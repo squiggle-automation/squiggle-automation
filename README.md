@@ -8,6 +8,10 @@ It ships with a small example configuration for security-reconnaissance tooling,
 
 See the [documentation](docs/source/index.rst) for more details.
 
+## Developed by HvS-Consulting
+
+![Developed by HvS-Consulting](https://github.com/squiggle-automation/squiggle-automation/blob/main/src/squiggle_automation/static/squiggle_automation/img/hvs.png?raw=true)
+
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0
