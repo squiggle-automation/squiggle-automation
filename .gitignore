@@ -1,0 +1,29 @@
+# Python
+/venv/
+/cli/build/
+*.pyc
+__pycache__
+*.egg-info/
+
+# Django / App
+/src/db.sqlite3*
+/src/celerybeat-schedule*
+/src/data/
+/src/.env
+
+# Deployment files
+/deployment/data/
+
+# Docs
+/docs/build/
+/docs/source/api/schema.yml
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Other
+.DS_Store

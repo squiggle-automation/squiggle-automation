@@ -1,0 +1,12 @@
+{
+  "errors": [],
+  "warnings": [],
+  "infos": [],
+  "data": {
+    "domain": [
+      { "domain": "tls-target.test.local" },
+      { "domain": "alt1.test.local" },
+      { "domain": "alt2.test.local" }
+    ]
+  }
+}

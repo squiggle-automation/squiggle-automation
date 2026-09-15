@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+files/
+static/
+db.sqlite3*
+celerybeat-schedule*

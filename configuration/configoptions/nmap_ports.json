@@ -1,0 +1,5 @@
+{
+  "name": "nmap_ports",
+  "description": "Ports to scan (nmap -p syntax, e.g. \"80,443\" or \"1-1000\"). Mutually exclusive with nmap_top_ports, one of the two is required.",
+  "sensitive": false
+}

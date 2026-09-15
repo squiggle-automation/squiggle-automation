@@ -1,0 +1,130 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+<h1>{% trans "Execution details" %}</h1>
+
+<h2>{% trans "Overview" %}</h2>
+<div class="row">
+    <div class="col-12">
+        <table class="table table-sm">
+            <tr>
+                <th>{% trans "Executor" %}</th>
+                <td>{{ execution.executor.name }}</td>
+            </tr>
+            <tr>
+                <th>{% trans "State" %}</th>
+                <td>{{ execution.get_state_display }}</td>
+            </tr>
+            <tr>
+                <th>{% trans "Created at" %}</th>
+                <td>{{ execution.created_at }}</td>
+            </tr>
+            <tr>
+                <th>{% trans "Scheduled at" %}</th>
+                <td>{{ execution.scheduled_at }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <form action="{% url "core:execution-retry" active_project.pk execution.pk %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-primary" {% if not execution.failed and not execution.finished %}disabled{% endif %}>
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> {% trans "Run again" %}
+            </button>
+        </form>
+
+        <a class="btn btn-sm btn-outline-primary" href="{% url "core:execution-input-entities" active_project.pk execution.pk %}">
+            <i class="bi bi-list-ul" aria-hidden="true"></i> {% trans "Show input entities" %}
+        </a>
+    </div>
+</div>
+
+<h2>{% trans "Applied configuration" %}</h2>
+<div class="row">
+    <div class="col-12">
+        {% if execution.applied_config %}
+            <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th scope="col" width="50%">{% trans "Option" %}</th>
+                    <th scope="col" width="50%">{% trans "Value" %}</th>
+                </tr>
+            </thead>
+
+                {% for name, value in execution.applied_config.items %}
+                <tr>
+                    <td scope="row">{{ name }}</td>
+                    <td scope="row">{{ value|default_if_none:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p class="text-muted">{% trans "No configuration stored." %}</p>
+        {% endif %}
+    </div>
+</div>
+
+<h2>{% trans "Artifacts" %}</h2>
+{% if artifacts %}
+    <div class="table-responsive">
+        <table class="table table-sm table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" width="80%">{% trans "File name" %}</th>
+                    <th scope="col" width="20%"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for artifact in artifacts %}
+                <tr>
+                    <td scope="row">{{ artifact }}</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" href="{% url "core:execution-artifact-download" active_project.pk execution.pk artifact %}">
+                            <i class="bi bi-download"></i> {% trans "Download" %}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if artifacts_limit_reached %}
+        <p class="text-muted">{% trans "More artifacts are available but not shown here." %}</p>
+    {% endif %}
+{% else %}
+    <p class="text-muted">{% trans "No artifacts." %}</p>
+{% endif %}
+
+<h2>{% trans "Logs" %}</h2>
+{% if logs %}
+    <div class="table-responsive">
+        <table class="table table-sm table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" width="60%">{% trans "Message" %}</th>
+                    <th scope="col" width="20%">{% trans "Level" %}</th>
+                    <th scope="col" width="20%">
+                        {% trans "Timestamp" %}<br/>
+                        <span class="text-muted fw-light">{% trans "Timestamp for events from executor usually is later than the time at which the event occurred." %}</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td scope="row">{{ log.message }}</td>
+                    <td>{{ log.get_level_display }}</td>
+                    <td>{{ log.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p class="text-muted">{% trans "No log entries." %}</p>
+{% endif %}
+{% endblock %}

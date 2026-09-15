@@ -1,0 +1,10 @@
+# use podman if it is there, otherwise docker
+# can be overwritten with CONTAINER_RUNTIME environment variable
+container_runtime := env_var_or_default("CONTAINER_RUNTIME", `command -v podman || echo "docker"`)
+
+# build the app container (same image used for app, beat and workers)
+build:
+  @echo "#"
+  @echo "# Building squiggle-automation container"
+  @echo "#"
+  {{container_runtime}} build -t quay.io/squiggle-automation/squiggle-automation .

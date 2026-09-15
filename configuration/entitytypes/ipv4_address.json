@@ -1,0 +1,17 @@
+{
+  "name": "ipv4_address",
+  "schema": {
+    "type": "object",
+    "required": [
+      "address"
+    ],
+    "properties": {
+      "address": {
+        "type": "string",
+        "format": "ipv4"
+      }
+    }
+  },
+  "identifier_keys": "address",
+  "approval_required": true
+}

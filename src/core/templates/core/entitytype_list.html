@@ -1,0 +1,65 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n static %}
+
+{% block content %}
+<h1>{% trans "Entity types" %}</h1>
+
+<div class="row">
+    <div class="col-12">
+        <a class="btn btn-outline-primary" href="{% url "core:entitytype-create" %}">
+            <i class="bi bi-plus"></i> {% trans "Create entity type" %}
+        </a>
+    </div>
+
+    <div class="col-12 mt-3">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" width="30%">{% trans "Entity Type" %}</th>
+                        <th scope="col" width="30%">{% trans "Identifier keys" %}</th>
+                        <th scope="col" width="20%">{% trans "Approval required" %}</th>
+                        <th scope="col" width="20%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entitytype in entitytypes %}
+                    <tr>
+                        <td scope="row">{{ entitytype.name }}</td>
+                        <td>{{ entitytype.identifier_keys }}</td>
+                        <td>
+                            {% if entitytype.approval_required %}
+                                <i class="bi bi-check-lg"></i>
+                            {% else %}
+                                <i class="bi bi-x-lg"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:entitytype-update" entitytype.pk %}">
+                                <i class="bi bi-pencil"></i> {% trans "Edit" %}
+                            </a>
+                            <a class="btn btn-sm btn-outline-primary" href="{% url "core:entitytype-delete" entitytype.pk %}">
+                                <i class="bi bi-trash3"></i> {% trans "Delete" %}
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#{{ entitytype.modal_id }}">
+                                <i class="bi bi-code-slash"></i> {% trans "JSON" %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include "squiggle_automation/components/pagination.html" %}
+    </div>
+</div>
+
+{% for entitytype in entitytypes %}
+{% include "core/components/json_modal.html" with modal_id=entitytype.modal_id modal_name=entitytype.name json_content=entitytype.api_json %}
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/clipboard.js' %}"></script>
+{% endblock %}

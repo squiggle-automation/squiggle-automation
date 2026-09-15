@@ -1,0 +1,16 @@
+{
+  "name": "dns-reverse",
+  "container": "dnsx",
+  "input": [
+    "ipv4_address",
+    "ipv6_address"
+  ],
+  "output": [
+    "domain"
+  ],
+  "max_entities": 100,
+  "max_entities_timeout": 0,
+  "workerprofile": "low",
+  "keep_tmp_files": false,
+  "enabled": true
+}

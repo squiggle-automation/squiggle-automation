@@ -1,0 +1,5 @@
+{
+  "name": "nmap_min_rate",
+  "description": "Minimum number of packets sent per second (nmap --min-rate).",
+  "sensitive": false
+}

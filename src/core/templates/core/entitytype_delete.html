@@ -1,0 +1,21 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+<h1 class="text-danger">{% trans "Delete entity type" %}</h1>
+
+<div class="row">
+    <div class="col-12">
+        <p class="text-danger">{% blocktrans trimmed %}Do you want to delete the entity type "{{ object }}"?{% endblocktrans %}</p>
+
+        <p class="text-danger">{% trans "This will delete all entities of this type and potentially break executors. The deletion cannot be undone and affects all projects." %}</p>
+
+        <p class="text-danger fw-bold">{% trans "Entity types should only be deleted with caution!" %}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash3"></i> {% trans "Delete" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

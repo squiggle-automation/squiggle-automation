@@ -1,0 +1,5 @@
+{
+  "name": "nmap_timing",
+  "description": "Timing template, 0 (slowest) to 5 (fastest) (nmap -T<N>). Default: nmap's own default (3).",
+  "sensitive": false
+}

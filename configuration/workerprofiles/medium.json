@@ -1,0 +1,5 @@
+{
+  "name": "medium",
+  "concurrency": 5,
+  "is_default": true
+}

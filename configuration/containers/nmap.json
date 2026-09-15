@@ -1,0 +1,22 @@
+{
+  "name": "nmap",
+  "image": "quay.io/squiggle-automation/executor-nmap",
+  "image_tag": "latest",
+  "cap_net_raw": true,
+  "net_host": true,
+  "configoptions": [
+    "nmap_custom_options",
+    "nmap_max_retries",
+    "nmap_max_rtt_timeout",
+    "nmap_min_hostgroup",
+    "nmap_min_rate",
+    "nmap_no_dns",
+    "nmap_ping",
+    "nmap_ports",
+    "nmap_scan_mode",
+    "nmap_script_scan",
+    "nmap_service_detection",
+    "nmap_timing",
+    "nmap_top_ports"
+  ]
+}

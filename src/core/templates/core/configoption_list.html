@@ -1,0 +1,74 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n static %}
+
+{% block content %}
+<h1>{% trans "Configuration" %}</h1>
+
+<div class="row">
+    <div class="col-12">
+        <a class="btn btn-outline-primary" href="{% url "core:configoption-create" %}">
+            <i class="bi bi-plus"></i> {% trans "Create configuration" %}
+        </a>
+    </div>
+
+    <div class="col-12 mt-3">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" width="30%">{% trans "Name" %}</th>
+                        <th scope="col" width="20%">{% trans "Sensitive" %}</th>
+                        <th scope="col" width="30%">{% trans "Global value" %}</th>
+                        <th scope="col" width="20%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for configoption in configoptions %}
+                    <tr>
+                        <td scope="row">{{ configoption.name }}</td>
+                        <td>
+                            {% if configoption.sensitive %}
+                                <i class="bi bi-check-lg"></i>
+                            {% else %}
+                                <i class="bi bi-x-lg"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if configoption.sensitive %}
+                                {% if configoption.get_default_value %}
+                                    <span class="text-muted">********</span>
+                                {% endif %}
+                            {% else %}
+                                {{ configoption.get_default_value.value }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:configoption-update" configoption.pk %}">
+                                <i class="bi bi-pencil"></i> {% trans "Edit" %}
+                            </a>
+                            <a class="btn btn-sm btn-outline-primary" href="{% url "core:configoption-delete" configoption.pk %}">
+                                <i class="bi bi-trash3"></i> {% trans "Delete" %}
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#{{ configoption.modal_id }}">
+                                <i class="bi bi-code-slash"></i> {% trans "JSON" %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include "squiggle_automation/components/pagination.html" %}
+    </div>
+</div>
+
+{% for configoption in configoptions %}
+{% blocktrans trimmed asvar configvalue_note with name=configoption.name %}Config values are not included here.{% endblocktrans %}
+{% include "core/components/json_modal.html" with modal_id=configoption.modal_id modal_name=configoption.name json_content=configoption.api_json note=configvalue_note %}
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/clipboard.js' %}"></script>
+{% endblock %}

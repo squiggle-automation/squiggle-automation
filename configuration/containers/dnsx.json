@@ -1,0 +1,12 @@
+{
+  "name": "dnsx",
+  "image": "quay.io/squiggle-automation/executor-dnsx",
+  "image_tag": "latest",
+  "cap_net_raw": false,
+  "net_host": false,
+  "configoptions": [
+    "dns_resolver",
+    "dnsx_custom_options",
+    "dnsx_mode"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "data": {
+    "ipv6_address": [
+      { "address": "fd00:100:100:100::20" }
+    ]
+  },
+  "configuration": {
+    "nmap_ports": "79-81,8443"
+  }
+}

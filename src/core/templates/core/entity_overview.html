@@ -1,0 +1,40 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "Entities" %}</h1>
+
+<div class="row">
+    <div class="col-12 mt-3">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" width="40%">{% trans "Entity Type" %}</th>
+                        <th scope="col" width="40%">{% trans "Number of entities" %}</th>
+                        <th scope="col" width="20%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entitytype in entitytypes %}
+                    <tr>
+                        <td scope="row">{{ entitytype.name }}</td>
+                        <td>
+                            <span class="badge bg-primary">{% trans "Total" %}: {{ entitytype.count }}</span>
+                            <span class="badge bg-success">{% trans "Active" %}: {{ entitytype.count_active }}</span>
+                            <span class="badge bg-warning text-dark">{% trans "Waiting" %}: {{ entitytype.count_waiting }}</span>
+                            <span class="badge bg-secondary">{% trans "Disabled" %}: {{ entitytype.count_disabled }}</span>
+                        </td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:entity-list" active_project.pk entitytype.name %}">
+                                <i class="bi bi-search"></i> {% trans "Show" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

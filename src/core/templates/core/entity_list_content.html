@@ -1,0 +1,159 @@
+{% load i18n %}
+
+{% comment %}
+Every control that makes up the current query carries class="entity-filter" and is sent along
+by hx-include, so that changing one of them keeps the others. That includes the hidden inputs
+for the shown columns below - the column selection lives in the url, not in an input, and
+would otherwise be lost as soon as a filter is typed.
+
+A <form> would be the obvious way to group them, but the table rows contain the forms for
+approve/decline/reprocess, and forms must not be nested - hence hx-include with a selector.
+{% endcomment %}
+{% for column in columns %}
+<input type="hidden" class="entity-filter" name="c" value="{{ column }}" />
+{% endfor %}
+
+<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+    <div>
+        <label class="visually-hidden" for="entity-search">{% trans "Search" %}</label>
+        <input type="search" class="form-control form-control-sm entity-filter" id="entity-search" name="q"
+               value="{{ search_term }}" placeholder="{% trans "Search all columns" %}"
+               hx-get="{{ request.path }}" hx-trigger="keyup changed delay:400ms, search, change"
+               hx-include=".entity-filter" />
+    </div>
+
+    <div>
+        <label class="visually-hidden" for="entity-state">{% trans "State" %}</label>
+        <select class="form-select form-select-sm entity-filter" id="entity-state" name="state"
+                hx-get="{{ request.path }}" hx-trigger="change" hx-include=".entity-filter">
+            <option value="">{% trans "Any state" %}</option>
+            {% for value, label in state_choices %}
+            <option value="{{ value }}" {% if state_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {% if column_options %}
+    <div class="dropdown">
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-layout-three-columns" aria-hidden="true"></i> {% trans "Columns" %}
+        </button>
+
+        <ul class="dropdown-menu">
+            {% for option in column_options %}
+            <li>
+                <a class="dropdown-item" href="{{ option.url }}"{% if list_htmx_target %} hx-get="{{ option.url }}"{% endif %}>
+                    {% if option.shown %}
+                        <i class="bi bi-check-square" aria-hidden="true"></i>
+                    {% else %}
+                        <i class="bi bi-square" aria-hidden="true"></i>
+                    {% endif %}
+                    {{ option.key }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if filters_active %}
+    <a class="btn btn-sm btn-outline-secondary" href="{{ clear_filters_url }}"
+       {% if list_htmx_target %}hx-get="{{ clear_filters_url }}"{% endif %}>
+        <i class="bi bi-x-lg" aria-hidden="true"></i> {% trans "Clear filters" %}
+    </a>
+    {% endif %}
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                {% for header in column_headers %}
+                <th scope="col"{% if header.sorted %} aria-sort="{% if header.descending %}descending{% else %}ascending{% endif %}"{% endif %}>
+                    <a class="link-underline link-underline-opacity-0 link-underline-opacity-100-hover text-body"
+                       href="{{ header.url }}"{% if list_htmx_target %} hx-get="{{ header.url }}"{% endif %}>
+                        {{ header.key }}
+                        {% if header.sorted %}
+                            {% if header.descending %}
+                            <i class="bi bi-sort-down" aria-hidden="true"></i>
+                            {% else %}
+                            <i class="bi bi-sort-up" aria-hidden="true"></i>
+                            {% endif %}
+                        {% endif %}
+                    </a>
+                </th>
+                {% endfor %}
+                <th scope="col" width="10%">{% trans "State" %}</th>
+                <th scope="col" width="25%"></th>
+            </tr>
+            <tr>
+                {% for header in column_headers %}
+                <th scope="col">
+                    <label class="visually-hidden" for="filter-{{ header.key }}">
+                        {% blocktrans with key=header.key %}Filter {{ key }}{% endblocktrans %}
+                    </label>
+                    <input type="search" class="form-control form-control-sm entity-filter fw-normal"
+                           id="filter-{{ header.key }}" name="{{ header.filter_name }}" value="{{ header.filter_value }}"
+                           hx-get="{{ request.path }}" hx-trigger="keyup changed delay:400ms, search, change"
+                           hx-include=".entity-filter" />
+                </th>
+                {% endfor %}
+                {# the state is filtered with the dropdown above, and the actions cannot be filtered #}
+                <th scope="col"></th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entity in entities %}
+            <tr>
+                {% for cell in entity.cells %}
+                <td>{{ cell|default_if_none:"-" }}</td>
+                {% endfor %}
+                <td>{{ entity.get_state_display }}</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:entity-update" active_project.pk entity.pk %}">
+                        <i class="bi bi-pencil"></i> {% trans "Edit" %}
+                    </a>
+                    <a class="btn btn-sm btn-outline-primary" href="{% url "core:entity-delete" active_project.pk entity.pk %}">
+                        <i class="bi bi-trash3"></i> {% trans "Delete" %}
+                    </a>
+                    {% if entity.state == entity.STATE_WAITING_APPROVAL %}
+                    <form action="{% url "core:entity-approve" active_project.pk entity.pk %}?{{ request.GET.urlencode }}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-success me-1">
+                            <i class="bi bi-check-lg"></i> {% trans "Approve" %}
+                        </button>
+                    </form>
+                    <form action="{% url "core:entity-decline" active_project.pk entity.pk %}?{{ request.GET.urlencode }}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger me-1">
+                            <i class="bi bi-x-lg"></i> {% trans "Decline" %}
+                        </button>
+                    </form>
+                    {% elif entity.state == entity.STATE_ENABLED %}
+                    <form action="{% url "core:entity-reprocess" active_project.pk entity.pk %}?{{ request.GET.urlencode }}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-secondary me-1">
+                            <i class="bi bi-arrow-counterclockwise"></i> {% trans "Reprocess" %}
+                        </button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="{{ columns|length|add:2 }}" class="text-muted">
+                    {% if filters_active %}
+                        {% trans "No entities match the filter." %}
+                    {% else %}
+                        {% trans "No entities of this type yet." %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "squiggle_automation/components/pagination.html" %}

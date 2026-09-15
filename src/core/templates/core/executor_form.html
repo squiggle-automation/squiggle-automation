@@ -1,0 +1,25 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+{% if object %}
+    <h1>{% trans "Edit executor" %}</h1>
+{% else %}
+    <h1>{% trans "Create executor" %}</h1>
+{% endif %}
+
+<div class="row">
+    <div class="col-12">
+        <form method="post">
+            {% csrf_token %}
+            {{ form | crispy }}
+
+            {% if not object %}
+            <p class="text-muted">{% trans "Config values can be set once the executor has been saved." %}</p>
+            {% endif %}
+
+            <button type="submit" class="btn btn-outline-primary"><i class="bi bi-check-lg"></i> {% trans "Save" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

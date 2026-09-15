@@ -1,0 +1,59 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n static %}
+
+{% block content %}
+<h1>{% trans "Containers" %}</h1>
+
+<div class="row">
+    <div class="col-12">
+        <a class="btn btn-outline-primary" href="{% url "core:container-create" %}">
+            <i class="bi bi-plus"></i> {% trans "Create container" %}
+        </a>
+    </div>
+
+    <div class="col-12 mt-3">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" width="20%">{% trans "Name" %}</th>
+                        <th scope="col" width="20%">{% trans "Image" %}</th>
+                        <th scope="col" width="40%">{% trans "Image tag" %}</th>
+                        <th scope="col" width="20%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for container in containers %}
+                    <tr>
+                        <td scope="row">{{ container.name }}</td>
+                        <td>{{ container.image }}</td>
+                        <td>{{ container.image_tag }}</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:container-update" container.pk %}">
+                                <i class="bi bi-pencil"></i> {% trans "Edit" %}
+                            </a>
+                            <a class="btn btn-sm btn-outline-primary" href="{% url "core:container-delete" container.pk %}">
+                                <i class="bi bi-trash3"></i> {% trans "Delete" %}
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#{{ container.modal_id }}">
+                                <i class="bi bi-code-slash"></i> {% trans "JSON" %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include "squiggle_automation/components/pagination.html" %}
+    </div>
+</div>
+
+{% for container in containers %}
+{% include "core/components/json_modal.html" with modal_id=container.modal_id modal_name=container.name json_content=container.api_json %}
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/clipboard.js' %}"></script>
+{% endblock %}

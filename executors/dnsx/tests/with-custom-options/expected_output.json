@@ -1,0 +1,10 @@
+{
+  "errors": [],
+  "warnings": [],
+  "infos": ["dnsx exited with code 0"],
+  "data": {
+    "ipv4_address": [
+      { "address": "10.10.0.42" }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "data": {
+    "domain": [
+      { "domain": "resolve.test.local" }
+    ]
+  },
+  "configuration": {
+    "dnsx_mode": "forward",
+    "dns_resolver": "100.100.100.10",
+    "dnsx_custom_options": "-cdn"
+  }
+}

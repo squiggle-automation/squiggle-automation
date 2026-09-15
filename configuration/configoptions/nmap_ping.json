@@ -1,0 +1,5 @@
+{
+  "name": "nmap_ping",
+  "description": "Enable host discovery before scanning. Default: false.",
+  "sensitive": false
+}

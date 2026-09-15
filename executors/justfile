@@ -1,0 +1,70 @@
+# use podman if it is there, otherwise docker
+# can be overwritten with CONTAINER_RUNTIME environment variable
+container_runtime := env_var_or_default("CONTAINER_RUNTIME", `command -v podman || echo "docker"`)
+
+# the actual build logic lives in the CLI so that it can easily be used in other repositories
+cli := "../cli/cli.py"
+
+#
+# BUILD
+#
+
+# build a specific container (also rebuilds the base image first)
+build executor: build-base
+  {{cli}} executor build "{{executor}}"
+
+# build the base container
+build-base:
+  {{cli}} executor build base
+
+# build all containers (base included - already rebuilt above, but that's a cheap no-op)
+build-all: build-base
+  {{cli}} executor build --all
+
+#
+# PUSH
+#
+
+# push a specific container (must be built first)
+push executor:
+  {{cli}} executor push "{{executor}}"
+
+# push all containers (must be built first)
+push-all:
+  {{cli}} executor push --all
+
+# show which containers would be pushed, without pushing them
+push-dry-run:
+  {{cli}} executor push --dry-run --all
+
+#
+# TEST
+#
+
+# bring up the target containers that executors run against during testing
+testenv-up:
+  @echo "#"
+  @echo "# Bringing up test environment"
+  @echo "#"
+  {{container_runtime}} compose -f _testenvironment/docker-compose.yml up -d --build
+
+# tear down the target containers
+testenv-down:
+  @echo "#"
+  @echo "# Bringing down test environment"
+  @echo "#"
+  {{container_runtime}} compose -f _testenvironment/docker-compose.yml down
+
+# run test case(s) for one executor (all cases if none given), e.g. `just test nmap` or
+# `just test nmap default-syn-scan`
+test executor case="": (build executor) testenv-up
+  @echo "#"
+  @echo "# Testing {{executor}} container"
+  @echo "#"
+  {{cli}} executor test "{{executor}}" "{{case}}"
+  just testenv-down
+
+# run every test case for every executor
+test-all: build-all testenv-up
+  {{cli}} executor test --all
+  just testenv-down

@@ -1,0 +1,15 @@
+{
+  "name": "dns-enumerate",
+  "container": "subfinder",
+  "input": [
+    "domain"
+  ],
+  "output": [
+    "domain"
+  ],
+  "max_entities": 100,
+  "max_entities_timeout": 0,
+  "workerprofile": "medium",
+  "keep_tmp_files": false,
+  "enabled": true
+}

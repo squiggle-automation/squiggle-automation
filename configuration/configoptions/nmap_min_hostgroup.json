@@ -1,0 +1,5 @@
+{
+  "name": "nmap_min_hostgroup",
+  "description": "Minimum size of host groups scanned in parallel (nmap --min-hostgroup).",
+  "sensitive": false
+}

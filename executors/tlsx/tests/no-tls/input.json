@@ -1,0 +1,8 @@
+{
+  "data": {
+    "service": [
+      { "address": "100.100.100.20", "port": 80, "protocol": "tcp", "service": "", "info": "" }
+    ]
+  },
+  "configuration": {}
+}

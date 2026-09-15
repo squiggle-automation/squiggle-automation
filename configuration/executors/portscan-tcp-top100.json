@@ -1,0 +1,16 @@
+{
+  "name": "portscan-tcp-top100",
+  "container": "nmap",
+  "input": [
+    "ipv4_address",
+    "ipv6_address"
+  ],
+  "output": [
+    "service"
+  ],
+  "max_entities": 100,
+  "max_entities_timeout": 0,
+  "workerprofile": "medium",
+  "keep_tmp_files": false,
+  "enabled": true
+}

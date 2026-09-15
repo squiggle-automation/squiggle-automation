@@ -1,0 +1,363 @@
+/* ---------------------------------------------------------------
+   Design tokens, from the "Squiggle Automation" Claude Design system
+   (warm-raspberry accent, warm neutral grays - a deliberate deviation
+   from the original indigo palette; see the design system's readme
+   for the one-line revert to `--accent: #4f6ef7` if ever wanted).
+   ------------------------------------------------------------- */
+
+:root {
+  /* Warm accent ramp (brand primary) */
+  --warm-50:  #fdf3f7;
+  --warm-100: #fae2ec;
+  --warm-200: #f2c1d4;
+  --warm-300: #e694b4;
+  --warm-400: #d15d8c;
+  --warm-500: #b52e68;
+  --warm-600: #9c1950;
+  --warm-700: #7c1240;
+  --warm-800: #5e0d31;
+
+  /* Warm neutral ramp */
+  --neutral-0:   #ffffff;
+  --neutral-50:  #faf9f7;
+  --neutral-100: #f4f1ec;
+  --neutral-200: #e7e3dd;
+  --neutral-300: #d6d1c9;
+  --neutral-400: #a8a29a;
+  --neutral-500: #78716c;
+  --neutral-600: #5c554f;
+  --neutral-700: #44403c;
+  --neutral-900: #1c1917;
+
+  /* Semantic aliases - product code uses these, not the ramps directly */
+  --accent:            var(--warm-600);
+  --accent-rgb:         156, 25, 80;
+  --accent-hover:      var(--warm-700);
+  --accent-subtle:     var(--warm-50);
+  --accent-subtle-strong: var(--warm-100);
+  --accent-on:         #ffffff;
+
+  --text-body:    var(--neutral-900);
+  --text-heading: var(--neutral-900);
+  --text-muted:   var(--neutral-500);
+  --text-faint:   var(--neutral-400);
+  --text-link:    var(--accent);
+
+  --surface-page:     var(--neutral-50);
+  --surface-card:     var(--neutral-0);
+  --surface-sunken:   var(--neutral-100);
+  --surface-hover:    var(--neutral-100);
+  --surface-selected: var(--accent-subtle);
+
+  --border:        var(--neutral-200);
+  --border-strong: var(--neutral-300);
+  --focus-ring:    rgba(var(--accent-rgb), .25);
+
+  /* Typography */
+  --font-sans: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'DM Mono', 'SFMono-Regular', Menlo, monospace;
+
+  --text-2xs: .65rem;
+  --text-xs:  .7rem;
+  --text-sm:  .825rem;
+  --text-base: .85rem;
+  --text-md:  .95rem;
+  --text-lg:  1rem;
+  --text-xl:  1.05rem;
+  --text-2xl: 1.1rem;
+  --text-3xl: 1.3rem;
+  --text-4xl: 1.35rem;
+  --text-5xl: 1.5rem;
+
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+
+  --leading-tight:  1.25;
+  --leading-normal: 1.5;
+  --tracking-label: .1em;
+
+  /* Spacing (fractional steps for control padding, whole steps for layout) */
+  --space-1: .25rem;
+  --space-2: .35rem;
+  --space-3: .45rem;
+  --space-4: .5rem;
+  --space-5: .65rem;
+  --space-6: .75rem;
+  --space-7: 1rem;
+  --space-8: 1.25rem;
+  --space-9: 1.5rem;
+  --space-10: 1.75rem;
+  --space-11: 2rem;
+  --space-12: 2.5rem;
+
+  --radius:      8px;
+  --radius-pill: 20px;
+
+  /* Elevation - a 1px contact edge plus a wide, soft ambient; used sparingly */
+  --shadow-card:    0 1px 3px rgba(0, 0, 0, .04), 0 8px 24px rgba(0, 0, 0, .06);
+  --shadow-popover: 0 2px 6px rgba(0, 0, 0, .05), 0 12px 32px rgba(0, 0, 0, .10);
+
+  /* Motion - fast, linear-ish micro transitions only */
+  --duration-fast: .13s;
+  --duration-base: .2s;
+}
+
+html, body {
+  font-family: var(--font-sans);
+}
+
+a {
+  text-underline-offset: 2px;
+}
+
+code, kbd, pre, samp, .mono {
+  font-family: var(--font-mono);
+}
+
+/* Page wrapper */
+.app-body {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Main content area */
+.app-main {
+  flex: 1;
+  padding: 2rem;
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------
+   Bootstrap 5 retint. The product is Bootstrap 5.3, not a custom
+   framework on top of it - every rule below only sets Bootstrap's
+   OWN custom properties (--bs-*), it never rewrites Bootstrap's
+   rules. Semantic colors (success/danger/warning/info) are
+   deliberately left at Bootstrap's defaults - the accent is the
+   only recolored hue. Scoped to bootstrap classes already used
+   somewhere in the app; nothing here requires new markup.
+   ------------------------------------------------------------- */
+
+:root,
+[data-bs-theme=light] {
+  --bs-primary:                 var(--accent);
+  --bs-primary-rgb:             var(--accent-rgb);
+  --bs-primary-text-emphasis:   var(--warm-700);
+  --bs-primary-bg-subtle:       var(--warm-50);
+  --bs-primary-border-subtle:   var(--warm-200);
+  --bs-link-color:              var(--accent);
+  --bs-link-color-rgb:          var(--accent-rgb);
+  --bs-link-hover-color:        var(--accent-hover);
+  --bs-link-hover-color-rgb:    124, 18, 64;
+  --bs-focus-ring-color:        var(--focus-ring);
+  --bs-focus-ring-width:        .25rem;
+
+  --bs-font-sans-serif:  var(--font-sans);
+  --bs-body-font-family: var(--font-sans);
+  --bs-font-monospace:   var(--font-mono);
+  --bs-body-font-size:   var(--text-base);
+  --bs-body-font-weight: var(--weight-regular);
+  --bs-body-line-height: var(--leading-normal);
+  --bs-body-color:       var(--text-body);
+  --bs-body-color-rgb:   28, 25, 23;
+  --bs-heading-color:    var(--text-heading);
+  --bs-secondary-color:  var(--text-muted);
+  --bs-tertiary-color:   var(--text-faint);
+  --bs-emphasis-color:   var(--neutral-900);
+
+  --bs-body-bg:                  var(--surface-card);
+  --bs-body-bg-rgb:              255, 255, 255;
+  --bs-secondary-bg:             var(--surface-page);
+  --bs-tertiary-bg:              var(--surface-sunken);
+  --bs-border-color:             var(--border);
+  --bs-border-color-translucent: var(--border);
+  --bs-secondary-rgb:            120, 113, 108;
+
+  --bs-border-radius:      var(--radius);
+  --bs-border-radius-sm:   var(--radius);
+  --bs-border-radius-lg:   var(--radius);
+  --bs-border-radius-xl:   var(--radius);
+  --bs-border-radius-pill: var(--radius-pill);
+}
+
+h1, .h1 { font-size: var(--text-5xl); }
+h2, .h2 { font-size: var(--text-3xl); }
+h3, .h3 { font-size: var(--text-2xl); }
+h4, .h4 { font-size: var(--text-lg); }
+h5, .h5, h6, .h6 { font-size: var(--text-base); }
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.btn {
+  --bs-btn-font-size:   var(--text-base);
+  --bs-btn-font-weight: var(--weight-medium);
+}
+
+.btn-sm { --bs-btn-font-size: var(--text-sm); }
+.btn-lg { --bs-btn-font-size: var(--text-xl); }
+
+.btn-primary {
+  --bs-btn-bg:                  var(--accent);
+  --bs-btn-border-color:        var(--accent);
+  --bs-btn-hover-bg:            var(--accent-hover);
+  --bs-btn-hover-border-color:  var(--accent-hover);
+  --bs-btn-active-bg:           var(--warm-800);
+  --bs-btn-active-border-color: var(--warm-800);
+  --bs-btn-disabled-bg:         var(--accent);
+  --bs-btn-disabled-border-color: var(--accent);
+}
+
+.btn-outline-primary {
+  --bs-btn-color:               var(--accent);
+  --bs-btn-border-color:        var(--accent);
+  --bs-btn-hover-bg:            var(--accent);
+  --bs-btn-hover-border-color:  var(--accent);
+  --bs-btn-active-bg:           var(--accent);
+  --bs-btn-active-border-color: var(--accent);
+  --bs-btn-disabled-color:        var(--accent);
+  --bs-btn-disabled-border-color: var(--accent);
+  --bs-btn-focus-shadow-rgb:    var(--accent-rgb);
+}
+
+.btn-outline-secondary {
+  --bs-btn-color:               var(--neutral-700);
+  --bs-btn-bg:                  var(--surface-card);
+  --bs-btn-border-color:        var(--border-strong);
+  --bs-btn-hover-color:         var(--neutral-900);
+  --bs-btn-hover-bg:            var(--surface-hover);
+  --bs-btn-hover-border-color:  var(--border-strong);
+  --bs-btn-active-color:        var(--neutral-900);
+  --bs-btn-active-bg:           var(--neutral-200);
+  --bs-btn-active-border-color: var(--border-strong);
+  --bs-btn-disabled-color:        var(--text-muted);
+  --bs-btn-disabled-border-color: var(--border);
+}
+
+.form-label {
+  font-size:   var(--text-base);
+  font-weight: var(--weight-medium);
+  color:       var(--neutral-700);
+}
+
+.form-text {
+  font-size: var(--text-sm);
+  color:     var(--text-muted);
+}
+
+.form-control,
+.form-select {
+  font-size:    var(--text-base);
+  border-color: var(--border-strong);
+  color:        var(--text-body);
+}
+
+.form-control::placeholder {
+  color: var(--text-faint);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--accent);
+  box-shadow:   0 0 0 .25rem var(--focus-ring);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  background: var(--surface-sunken);
+  color:      var(--text-muted);
+}
+
+.invalid-feedback {
+  font-size: var(--text-sm);
+}
+
+.form-check .form-check-input {
+  border-color: var(--border-strong);
+}
+
+.form-check-input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.form-check-input:focus {
+  border-color: var(--accent);
+  box-shadow:   0 0 0 .25rem var(--focus-ring);
+}
+
+.form-check-input:disabled {
+  background:   var(--surface-sunken);
+  border-color: var(--border);
+}
+
+.card {
+  --bs-card-border-color: var(--border);
+  --bs-card-bg:           var(--surface-card);
+}
+
+.table {
+  --bs-table-hover-bg:   var(--surface-hover);
+  --bs-table-border-color: var(--border);
+  --bs-table-color:      var(--text-body);
+  font-size: var(--text-sm);
+}
+
+.table > thead > tr > th {
+  font-size:      var(--text-2xs);
+  font-weight:    var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color:          var(--text-muted);
+}
+
+.badge {
+  font-family: var(--font-mono);
+}
+
+.nav-link {
+  --bs-nav-link-color:       var(--text-muted);
+  --bs-nav-link-hover-color: var(--neutral-900);
+}
+
+.dropdown-menu {
+  --bs-dropdown-border-color:      var(--border);
+  --bs-dropdown-link-active-bg:    var(--surface-selected);
+  --bs-dropdown-link-active-color: var(--accent);
+  --bs-dropdown-link-hover-bg:     var(--surface-hover);
+  box-shadow: var(--shadow-popover);
+}
+
+.modal-content {
+  --bs-modal-border-color: transparent;
+  box-shadow: var(--shadow-popover);
+}
+
+.modal-header,
+.modal-footer {
+  --bs-modal-header-border-color: var(--border);
+  --bs-modal-footer-border-color: var(--border);
+}
+
+.alert {
+  font-size: var(--text-base);
+}
+
+.list-group {
+  --bs-list-group-border-color:        var(--border);
+  --bs-list-group-active-bg:           var(--surface-selected);
+  --bs-list-group-active-color:        var(--accent);
+  --bs-list-group-active-border-color: var(--border);
+  --bs-list-group-action-hover-bg:     var(--surface-hover);
+}
+
+.progress {
+  --bs-progress-bg:      var(--surface-sunken);
+  --bs-progress-bar-bg:  var(--accent);
+}
+
+.spinner-border,
+.spinner-grow {
+  color: var(--accent);
+}

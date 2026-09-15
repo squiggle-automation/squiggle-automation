@@ -1,0 +1,38 @@
+{
+  "name": "service",
+  "schema": {
+    "type": "object",
+    "required": [
+      "address",
+      "port",
+      "protocol"
+    ],
+    "properties": {
+      "address": {
+        "type": "string",
+        "description": ""
+      },
+      "port": {
+        "type": "number",
+        "description": ""
+      },
+      "protocol": {
+        "enum": [
+          "tcp",
+          "udp"
+        ],
+        "type": "string"
+      },
+      "service": {
+        "type": "string",
+        "description": ""
+      },
+      "info": {
+        "type": "string",
+        "description": ""
+      }
+    }
+  },
+  "identifier_keys": "address,port,protocol",
+  "approval_required": false
+}

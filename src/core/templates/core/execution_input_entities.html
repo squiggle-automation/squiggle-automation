@@ -1,0 +1,47 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "Input entities" %}</h1>
+
+<div class="row">
+    <div class="col-12">
+        <a class="btn btn-outline-secondary mb-3" href="{% url "core:execution-details" active_project.pk execution.pk %}">
+            <i class="bi bi-arrow-left"></i> {% trans "Back to execution" %}
+        </a>
+    </div>
+</div>
+
+{% if entities %}
+    <div class="table-responsive">
+        <table class="table table-sm table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" width="30%">{% trans "Entity type" %}</th>
+                    <th scope="col" width="40%">{% trans "Identifier" %}</th>
+                    <th scope="col" width="15%">{% trans "State" %}</th>
+                    <th scope="col" width="15%"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entity in entities %}
+                <tr>
+                    <td scope="row">{{ entity.entitytype.name }}</td>
+                    <td>{{ entity.identifier_value }}</td>
+                    <td>{{ entity.get_state_display }}</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" href="{% url "core:entity-update" active_project.pk entity.pk %}">
+                            <i class="bi bi-pencil"></i> {% trans "Edit" %}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "squiggle_automation/components/pagination.html" %}
+{% else %}
+    <p class="text-muted">{% trans "No input entities." %}</p>
+{% endif %}
+{% endblock %}

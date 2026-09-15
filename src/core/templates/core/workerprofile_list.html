@@ -1,0 +1,67 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n static %}
+
+{% block content %}
+<h1>{% trans "Worker profiles" %}</h1>
+
+<div class="alert alert-primary" role="alert">
+    {% trans "When adding or deleting worker profiles, the workers are not automatically started/stopped. Changing the concurrency automatically scales the worker." %}
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <a class="btn btn-outline-primary" href="{% url "core:workerprofile-create" %}">
+            <i class="bi bi-plus"></i> {% trans "Create worker profile" %}
+        </a>
+    </div>
+
+    <div class="col-12 mt-3">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" width="40%">{% trans "Name" %}</th>
+                        <th scope="col" width="20%">{% trans "Concurrency" %}</th>
+                        <th scope="col" width="20%">{% trans "Default" %}</th>
+                        <th scope="col" width="20%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for worker in workers %}
+                    <tr>
+                        <td scope="row">{{ worker.name }}</td>
+                        <td>{{ worker.concurrency }}</td>
+                        <td>
+                            {% if worker.is_default %}
+                                <i class="bi bi-check-lg"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:workerprofile-update" worker.pk %}">
+                                <i class="bi bi-pencil"></i> {% trans "Edit" %}
+                            </a>
+                            <a class="btn btn-sm btn-outline-primary{% if worker.is_default %} disabled{% endif %}" href="{% url "core:workerprofile-delete" worker.pk %}">
+                                <i class="bi bi-trash3"></i> {% trans "Delete" %}
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#{{ worker.modal_id }}">
+                                <i class="bi bi-code-slash"></i> {% trans "JSON" %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include "squiggle_automation/components/pagination.html" %}
+    </div>
+</div>
+
+{% for worker in workers %}
+{% include "core/components/json_modal.html" with modal_id=worker.modal_id modal_name=worker.name json_content=worker.api_json %}
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/clipboard.js' %}"></script>
+{% endblock %}

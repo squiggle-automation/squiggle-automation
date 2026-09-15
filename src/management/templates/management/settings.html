@@ -1,0 +1,17 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "Settings" %}</h1>
+
+<ul>
+    <li><a href="{% url "management:password-change" %}">{% trans "Change password" %}</a></li>
+    <li><a href="{% url "management:apitoken" %}">{% trans "API token" %}</a></li>
+    {% if user.is_superuser %}
+    <li><a href="{% url "management:users" %}">{% trans "Users" %}</a></li>
+    <li><a href="{% url "admin:index" %}">{% trans "Django Admin" %}</a></li>
+    {% endif %}
+</ul>
+
+<p>{% trans "Version" %}: {{ app_version }}</p>
+{% endblock %}

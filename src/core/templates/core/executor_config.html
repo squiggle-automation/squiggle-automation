@@ -1,0 +1,27 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+<h1>{% blocktrans trimmed with name=object.name %}Configure values for "{{ name }}"{% endblocktrans %}</h1>
+
+<div class="row">
+    <div class="col-12">
+        <form method="post">
+            {% csrf_token %}
+
+            {% for f in value_forms %}
+                <h2>{{ f.configoption.name }}</h2>
+                {{ f | crispy }}
+            {% empty %}
+                <p class="text-muted">{% trans "This executor's container does not define any config options." %}</p>
+            {% endfor %}
+
+            {% if value_forms %}
+                <button type="submit" class="btn btn-outline-primary"><i class="bi bi-check-lg"></i> {% trans "Save" %}</button>
+            {% else %}
+                <a href="{% url 'core:executors' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> {% trans "Back" %}</a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

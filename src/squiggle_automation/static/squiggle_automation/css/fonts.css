@@ -1,0 +1,44 @@
+/* DM Sans 400 */
+@font-face {
+  font-display: swap;
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/dm-sans-v17-latin-400.woff2') format('woff2');
+}
+
+/* DM Sans 500 */
+@font-face {
+  font-display: swap;
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../fonts/dm-sans-v17-latin-500.woff2') format('woff2');
+}
+
+/* DM Sans 600 */
+@font-face {
+  font-display: swap;
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../fonts/dm-sans-v17-latin-600.woff2') format('woff2');
+}
+
+/* DM Mono 400 */
+@font-face {
+  font-display: swap;
+  font-family: 'DM Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/dm-mono-v16-latin-400.woff2') format('woff2');
+}
+
+/* DM Mono 500 */
+@font-face {
+  font-display: swap;
+  font-family: 'DM Mono';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../fonts/dm-mono-v16-latin-500.woff2') format('woff2');
+}

@@ -1,0 +1,10 @@
+{
+  "data": {
+    "ipv4_address": [
+      { "address": "100.100.100.20" }
+    ]
+  },
+  "configuration": {
+    "nmap_ports": "9000-9002"
+  }
+}

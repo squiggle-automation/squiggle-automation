@@ -1,0 +1,5 @@
+{
+  "name": "nmap_max_retries",
+  "description": "Maximum number of port scan probe retransmissions (nmap --max-retries).",
+  "sensitive": false
+}

@@ -1,0 +1,5 @@
+{
+  "name": "dnsx_custom_options",
+  "description": "Extra dnsx command-line flags",
+  "sensitive": false
+}

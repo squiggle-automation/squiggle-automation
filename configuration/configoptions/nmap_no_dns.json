@@ -1,0 +1,5 @@
+{
+  "name": "nmap_no_dns",
+  "description": "Never do reverse DNS resolution (nmap -n). Default: false.",
+  "sensitive": false
+}

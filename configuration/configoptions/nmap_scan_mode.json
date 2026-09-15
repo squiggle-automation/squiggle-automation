@@ -1,0 +1,5 @@
+{
+  "name": "nmap_scan_mode",
+  "description": "Scan mode: syn, connect or udp. Default: syn.",
+  "sensitive": false
+}

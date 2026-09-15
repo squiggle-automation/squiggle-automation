@@ -1,0 +1,33 @@
+{% extends "squiggle_automation/base.html" %}
+{% load static i18n crispy_forms_tags %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'squiggle_automation/css/login.css' %}" />
+{% endblock %}
+
+{% block body %}
+<main class="login-page">
+    <div class="login-card">
+        <div class="login-brand">
+            <i class="bi bi-diagram-3" aria-hidden="true"></i> {% trans "Squiggle Automation" %}
+        </div>
+
+        <h1 class="login-title">{% trans "Sign In" %}</h1>
+        <p class="login-subtitle">{% trans "Sign in to your account to continue" %}</p>
+
+        <form method="post" accept-charset="utf-8" role="form" class="login-form">
+            {% csrf_token %}
+
+            {{ form | crispy }}
+
+            <input type="hidden" name="next" value="{{ next }}" />
+            <button type="submit" class="btn btn-outline-primary w-100">{% trans "Sign In" %}</button>
+        </form>
+
+        <div class="login-footer">
+            <p class="login-footer-label">{% trans "Developed by" %}</p>
+            <img src="{% static 'squiggle_automation/img/hvs.png' %}" alt="hvs consulting" class="login-footer-logo" />
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n static crispy_forms_tags %}
+
+{% block content %}
+{% if object %}
+    <h1>{% trans "Edit entity" %}</h1>
+{% else %}
+    <h1>{% trans "Create entity" %}</h1>
+{% endif %}
+
+<div class="row">
+    <div class="col-12">
+        <form method="post">
+            {% csrf_token %}
+            {{ form | crispy }}
+            <button type="submit" class="btn btn-outline-primary"><i class="bi bi-check-lg"></i> {% trans "Save" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'squiggle_automation/vendor/jedison/jedison.umd.js' %}"></script>
+<script src="{% static 'core/js/entity_form.js' %}"></script>
+{% endblock %}

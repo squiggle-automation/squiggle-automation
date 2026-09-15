@@ -1,0 +1,100 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n static %}
+
+{% block content %}
+<h1>{% trans "Executors" %}</h1>
+
+<div class="row">
+    <div class="col-12">
+        <a class="btn btn-outline-primary" href="{% url "core:executor-create" %}">
+            <i class="bi bi-plus"></i> {% trans "Create executor" %}
+        </a>
+    </div>
+
+    <div class="col-12 mt-3">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" width="15%">{% trans "Name" %}</th>
+                        <th scope="col" width="15%">{% trans "Container" %}</th>
+                        <th scope="col" width="15%">{% trans "Input" %}</th>
+                        <th scope="col" width="15%">{% trans "Output" %}</th>
+                        <th scope="col" width="10%">{% trans "Entity grouping" %}</th>
+                        <th scope="col" width="10%">{% trans "Worker profile" %}</th>
+                        <th scope="col" width="5%">{% trans "Enabled" %}</th>
+                        <th scope="col" width="15%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for executor in executors %}
+                    <tr>
+                        <td scope="row">{{ executor.name }}</td>
+                        <td scope="row">{{ executor.container.name }}</td>
+                        <td scope="row">
+                            <ul class="m-0">
+                                {% for i in executor.input.all %}
+                                    <li>{{ i }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td scope="row">
+                            <ul class="m-0">
+                                {% for o in executor.output.all %}
+                                    <li>{{ o }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td scope="row">
+                            {{ executor.max_entities }} {% trans "entities" %} <br>
+                            {{ executor.max_entities_timeout }} {% trans "minutes" %}
+                        </td>
+                        <td scope="row">
+                            {{ executor.workerprofile.name }}
+                        </td>
+                        <td scope="row">
+                            {% if executor.enabled %}
+                                <i class="bi bi-check-lg"></i>
+                            {% else %}
+                                <i class="bi bi-x-lg"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:executor-update" executor.pk %}">
+                                <i class="bi bi-pencil"></i> {% trans "Edit" %}
+                            </a>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:executor-config" executor.pk %}">
+                                <i class="bi bi-sliders"></i> {% trans "Config" %}
+                            </a>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:executor-delete" executor.pk %}">
+                                <i class="bi bi-trash3"></i> {% trans "Delete" %}
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#{{ executor.modal_id }}">
+                                <i class="bi bi-code-slash"></i> {% trans "JSON" %}
+                            </button>
+                            <form action="{% url "core:executor-run-all-entities" executor.pk %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-primary" {% if not active_project %}disabled{% endif %}>
+                                    <i class="bi bi-play-fill"></i> {% trans "Run on all entities" %}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include "squiggle_automation/components/pagination.html" %}
+    </div>
+</div>
+
+{% for executor in executors %}
+{% blocktrans trimmed asvar configvalue_note with name=executor.name %}Config values are not included here.{% endblocktrans %}
+{% include "core/components/json_modal.html" with modal_id=executor.modal_id modal_name=executor.name json_content=executor.api_json note=configvalue_note %}
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/clipboard.js' %}"></script>
+{% endblock %}

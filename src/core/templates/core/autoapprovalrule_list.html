@@ -1,0 +1,69 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n static %}
+
+{% block content %}
+<h1>{% trans "Auto approval rules" %}</h1>
+
+<div class="row">
+    <div class="col-12">
+        <a class="btn btn-outline-primary" href="{% url "core:autoapprovalrule-create" active_project.pk %}">
+            <i class="bi bi-plus"></i> {% trans "Create auto approval rule" %}
+        </a>
+    </div>
+
+    <div class="col-12 mt-3">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" width="20%">{% trans "Name" %}</th>
+                        <th scope="col" width="20%">{% trans "Entity Type" %}</th>
+                        <th scope="col" width="15%">{% trans "Field" %}</th>
+                        <th scope="col" width="15%">{% trans "Operator" %}</th>
+                        <th scope="col" width="10%">{% trans "Action" %}</th>
+                        <th scope="col" width="20%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rule in autoapprovalrules %}
+                    <tr>
+                        <td scope="row">{{ rule.name }}</td>
+                        <td>{{ rule.entitytype }}</td>
+                        <td>{{ rule.field }}</td>
+                        <td>{{ rule.get_operator_display }}</td>
+                        <td>{{ rule.get_action_display }}</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:autoapprovalrule-update" active_project.pk rule.pk %}">
+                                <i class="bi bi-pencil"></i> {% trans "Edit" %}
+                            </a>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:autoapprovalrule-delete" active_project.pk rule.pk %}">
+                                <i class="bi bi-trash3"></i> {% trans "Delete" %}
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#{{ rule.modal_id }}">
+                                <i class="bi bi-code-slash"></i> {% trans "JSON" %}
+                            </button>
+                            <form action="{% url "core:autoapprovalrule-run" active_project.pk rule.pk %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-play-fill"></i> {% trans "Run now" %}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include "squiggle_automation/components/pagination.html" %}
+    </div>
+</div>
+
+{% for rule in autoapprovalrules %}
+{% include "core/components/json_modal.html" with modal_id=rule.modal_id modal_name=rule.name json_content=rule.api_json %}
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/clipboard.js' %}"></script>
+{% endblock %}

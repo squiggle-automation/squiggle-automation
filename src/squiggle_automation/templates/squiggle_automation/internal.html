@@ -1,0 +1,92 @@
+{% extends "squiggle_automation/base.html" %}
+{% load static i18n %}
+
+{% block body %}
+{# Menu #}
+<aside class="app-sidebar" id="appSidebar" aria-label="Sidebar navigation">
+    {% if user.is_authenticated %}
+    {% if active_project %}
+        <span class="sidebar-label">{% trans "Project" %}</span>
+
+        <a href="{% url "core:entities" active_project.pk %}" class="sidebar-link {% if request.resolver_match.view_name == 'core:entities' %}active{% endif %}">
+            <i class="bi bi-diagram-3" aria-hidden="true"></i> {% trans "Entities" %}
+        </a>
+
+        <a href="{% url "core:executions" active_project.pk %}" class="sidebar-link {% if request.resolver_match.view_name == 'core:executions' %}active{% endif %}">
+            <i class="bi bi-shuffle" aria-hidden="true"></i> {% trans "Executions" %}
+        </a>
+
+        <a href="{% url "core:autoapprovalrules" active_project.pk %}" class="sidebar-link {% if request.resolver_match.view_name == 'core:autoapprovalrules' %}active{% endif %}">
+            <i class="bi bi-signpost-split" aria-hidden="true"></i> {% trans "Auto approval rules" %}
+        </a>
+    {% endif %}
+
+    <span class="sidebar-label">{% trans "Manage" %}</span>
+
+    <a href="{% url "core:entitytypes" %}" class="sidebar-link {% if request.resolver_match.view_name == 'core:entitytypes' %}active{% endif %}">
+        <i class="bi bi-braces" aria-hidden="true"></i> {% trans "Entity types" %}
+    </a>
+
+    <details {% if "core:container" in request.resolver_match.view_name or "core:executor" in request.resolver_match.view_name or "core:workerprofiles" in request.resolver_match.view_name %}open{%endif %}>
+        <summary class="sidebar-group-toggle">
+            <i class="bi bi-code" aria-hidden="true"></i> {% trans "Executors" %}
+            <i class="bi bi-chevron-down toggle-arrow" aria-hidden="true"></i>
+        </summary>
+        <div class="sidebar-group-items">
+            <a href="{% url "core:containers" %}" class="sidebar-link {% if request.resolver_match.view_name == 'core:containers' %}active{% endif %}">
+                <i class="bi bi-box" aria-hidden="true"></i> {% trans "Containers" %}
+            </a>
+            <a href="{% url "core:executors" %}" class="sidebar-link {% if request.resolver_match.view_name == 'core:executors' %}active{% endif %}">
+                <i class="bi bi-caret-right" aria-hidden="true"></i> {% trans "Executors" %}
+            </a>
+            <a href="{% url "core:workerprofiles" %}" class="sidebar-link {% if request.resolver_match.view_name == 'core:workerprofiles' %}active{% endif %}">
+                <i class="bi bi-cpu" aria-hidden="true"></i> {% trans "Worker profiles" %}
+            </a>
+        </div>
+    </details>
+
+    <a href="{% url "core:configoptions" %}" class="sidebar-link {% if request.resolver_match.view_name == 'core:configoptions' %}active{% endif %}">
+        <i class="bi bi-sliders" aria-hidden="true"></i> {% trans "Configuration" %}
+    </a>
+
+    <div class="sidebar-divider"></div>
+    {% if active_project %}
+        <span class="sidebar-project">{% trans "PROJECT" %}: {{ active_project }}</span>
+        {% if active_project.run_executors == False %}
+            <span class="sidebar-project text-warning">{% trans "Executors disabled" %}</span>
+        {% endif %}
+
+        <div class="sidebar-divider"></div>
+    {% endif %}
+
+    <div class="sidebar-footer">
+        <a href="{% url "core:projects" %}" class="sidebar-link {% if request.resolver_match.view_name == 'core:projects' %}active{% endif %}">
+            <i class="bi bi-list-task" aria-hidden="true"></i> {% trans "Projects" %}
+        </a>
+
+        <a href="{% url "management:settings" %}" class="sidebar-link {% if request.resolver_match.view_name == 'management:settings' %}active{% endif %}">
+            <i class="bi bi-gear" aria-hidden="true"></i> {% trans "Settings" %}
+        </a>
+
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button class="sidebar-link sidebar-link-btn" type="submit">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i> {% trans "Logout" %}
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</aside>
+
+{# Main content #}
+<main class="container-fluid sidebar-layout-main">
+    {% for message in messages %}
+        <div class="alert alert-primary" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% block content %}
+    {% endblock %}
+</main>
+{% endblock %}

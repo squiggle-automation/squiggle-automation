@@ -1,0 +1,9 @@
+{
+    "container": {
+        "registry": "quay.io/squiggle-automation",
+        "prefix": "executor"
+    },
+    "testing": {
+        "attach_network": "executor-test"
+    }
+}

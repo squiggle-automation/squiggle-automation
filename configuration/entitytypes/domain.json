@@ -1,0 +1,16 @@
+{
+  "name": "domain",
+  "schema": {
+    "type": "object",
+    "required": [
+      "domain"
+    ],
+    "properties": {
+      "domain": {
+        "type": "string"
+      }
+    }
+  },
+  "identifier_keys": "domain",
+  "approval_required": true
+}

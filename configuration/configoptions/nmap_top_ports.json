@@ -1,0 +1,5 @@
+{
+  "name": "nmap_top_ports",
+  "description": "Top ports to scan. Mutually exclusive with nmap_ports.",
+  "sensitive": false
+}

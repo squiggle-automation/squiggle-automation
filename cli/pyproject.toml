@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools~=84.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "squiggle-automation-cli"
+version = "0.1.0"
+description = "CLI for the squiggle-automation REST API and for building/testing executor container images"
+requires-python = ">=3.8"
+
+[project.scripts]
+sqg = "squiggle_automation_cli:main"
+
+[tool.setuptools.packages.find]
+include = ["squiggle_automation_cli*"]

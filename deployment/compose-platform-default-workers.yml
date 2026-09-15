@@ -1,0 +1,128 @@
+name: squiggle-automation
+
+# This setup expects that the worker profiles are called "low", "medium" and "high"
+# If you change this, you need to adapt the compose file (services app-worker-*)
+
+# The DB is stored in volumes, but the artifacts and tmp files are mounts from the host
+# By default, this file uses the directories data/artifacts and data/tmp
+
+# The Docker socket of your host is mounted into the workers!
+
+services:
+  # main app + main celery worker
+  app:
+    image: quay.io/squiggle-automation/squiggle-automation
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+     - .env.static
+     - .env
+
+    volumes:
+      - ./data/artifacts:/data/artifacts
+      - ./data/tmp:/data/tmp
+
+    depends_on:
+      - db
+      - mq
+
+    restart: on-failure
+
+  app-celery:
+    image: quay.io/squiggle-automation/squiggle-automation
+
+    command: ["beat"]
+
+    env_file:
+     - .env.static
+     - .env
+
+    volumes:
+      - ./data/artifacts:/data/artifacts
+      - ./data/tmp:/data/tmp
+
+    depends_on:
+      - db
+      - mq
+      - app
+
+    restart: on-failure
+
+  # database and rabbitmq
+  db:
+    image: postgres
+
+    shm_size: 128mb
+
+    volumes:
+      - db-data:/var/lib/postgresql
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    restart: on-failure
+
+  mq:
+    image: rabbitmq:4.2
+
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
+
+    restart: on-failure
+
+  # the workers - we assume that we have the profiles low, medium, high
+  app-worker-low:
+    image: quay.io/squiggle-automation/squiggle-automation
+
+    command: ["worker", "low"]
+
+    env_file:
+     - .env.static
+     - .env
+
+    environment:
+      ARTIFACTS_DIR_HOST_OVERRIDE: ${PWD}/data/artifacts
+      TMP_DIR_HOST_OVERRIDE: ${PWD}/data/tmp
+
+    volumes:
+      - ./data/artifacts:/data/artifacts
+      - ./data/tmp:/data/tmp
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    depends_on:
+      - db
+      - mq
+      - app
+
+    restart: on-failure
+
+  app-worker-medium:
+    extends:
+      service: app-worker-low
+
+    command: ["worker", "medium"]
+
+    depends_on:
+      - db
+      - mq
+      - app
+
+  app-worker-high:
+    extends:
+      service: app-worker-low
+
+    command: ["worker", "high"]
+
+    depends_on:
+      - db
+      - mq
+      - app
+
+volumes:
+  db-data:

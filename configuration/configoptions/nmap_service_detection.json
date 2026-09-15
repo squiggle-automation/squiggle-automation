@@ -1,0 +1,5 @@
+{
+  "name": "nmap_service_detection",
+  "description": "Enable service/version detection (nmap -sV). Default: false.",
+  "sensitive": false
+}

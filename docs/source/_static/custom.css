@@ -1,0 +1,229 @@
+/* -----------------------------------------------------------------
+   Retint sphinx_rtd_theme to match the app's warm-raspberry design
+   tokens (see src/squiggle_automation/static/squiggle_automation/css/
+   base.css - this file mirrors those values by hand since the theme
+   predates CSS custom properties and hardcodes its own colors).
+   ------------------------------------------------------------- */
+
+:root {
+  --accent:               #9c1950; /* warm-600 */
+  --accent-hover:         #7c1240; /* warm-700 */
+  --accent-active:        #5e0d31; /* warm-800 */
+  --accent-subtle:        #fdf3f7; /* warm-50 */
+  --accent-subtle-strong: #fae2ec; /* warm-100 */
+
+  --text-body:    #1c1917; /* neutral-900 */
+  --text-muted:   #78716c; /* neutral-500 */
+  --text-faint:   #a8a29a; /* neutral-400 */
+
+  --surface-page:   #faf9f7; /* neutral-50 */
+  --surface-card:   #ffffff; /* neutral-0 */
+  --surface-sunken: #f4f1ec; /* neutral-100 */
+
+  --border:        #e7e3dd; /* neutral-200 */
+  --border-strong: #d6d1c9; /* neutral-300 */
+
+  --sidebar-bg:      #1c1917; /* neutral-900, replaces the theme's near-black #343131 */
+  --sidebar-bg-flat: #262220; /* one step lighter, for the version flyout */
+  --sidebar-text:    #a8a29a; /* neutral-400 */
+}
+
+/* Body copy, page background */
+body,
+.wy-body-for-nav,
+.wy-nav-content-wrap,
+.wy-nav-content {
+  color: var(--text-body);
+  background: var(--surface-page);
+}
+
+.wy-nav-content {
+  background: var(--surface-card);
+}
+
+/* Links */
+a,
+.rst-content a code,
+.rst-content a tt {
+  color: var(--accent);
+}
+
+a:hover,
+.wy-text-info:hover {
+  color: var(--accent-hover);
+}
+
+/* Sidebar (left nav) */
+.wy-nav-side {
+  background: var(--sidebar-bg);
+}
+
+.wy-side-nav-search {
+  background-color: var(--accent);
+}
+
+.wy-side-nav-search input[type="text"] {
+  border-color: var(--accent-hover);
+}
+
+.wy-side-nav-search img {
+  background-color: var(--accent);
+}
+
+.wy-nav .wy-menu-vertical header,
+.wy-menu-vertical p.caption {
+  color: var(--accent);
+}
+
+.wy-menu-vertical a {
+  color: var(--sidebar-text);
+}
+
+.wy-menu-vertical a:hover {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+.wy-menu-vertical a:active {
+  background-color: var(--accent-active);
+  color: #fff;
+}
+
+.wy-menu-vertical li.current > a,
+.wy-menu-vertical li.on a {
+  background: var(--surface-card);
+  color: var(--text-body);
+  border: none;
+}
+
+.wy-menu-vertical li.current > a:hover,
+.wy-menu-vertical li.on a:hover {
+  background: var(--surface-card);
+}
+
+.wy-menu-vertical li.toctree-l2.current > a,
+.wy-menu-vertical li.toctree-l3.current > a {
+  background: var(--surface-sunken);
+}
+
+.wy-menu-vertical li.toctree-l2.current li.toctree-l3 > a,
+.wy-menu-vertical li.toctree-l3.current li.toctree-l4 > a {
+  background: var(--surface-sunken);
+}
+
+/* Mobile top bar */
+.wy-nav-top {
+  background: var(--accent);
+}
+
+.wy-nav-top img {
+  background-color: var(--accent);
+}
+
+/* Version flyout */
+.rst-versions {
+  background: var(--sidebar-bg);
+}
+
+.rst-versions .rst-current-version {
+  background-color: var(--sidebar-bg-flat);
+  color: var(--accent-subtle-strong);
+}
+
+.rst-versions a {
+  color: var(--accent-subtle-strong);
+}
+
+/* Buttons */
+.btn-info {
+  background-color: var(--accent) !important;
+}
+
+.btn-info:hover {
+  background-color: var(--accent-hover) !important;
+}
+
+.btn-neutral {
+  background-color: var(--surface-sunken) !important;
+  color: var(--text-body) !important;
+}
+
+/* Tables */
+.rst-content table.docutils,
+.wy-table-bordered-all {
+  border-color: var(--border);
+}
+
+.rst-content table.docutils thead th,
+.wy-table thead th {
+  border-bottom-color: var(--border);
+}
+
+.rst-content table.docutils td,
+.wy-table-bordered-all td {
+  border-color: var(--border);
+}
+
+.wy-table-odd td,
+.wy-table-striped tr:nth-child(2n-1) td {
+  background-color: var(--surface-sunken);
+}
+
+/* Inline code / literal blocks */
+.rst-content code,
+.rst-content tt,
+code {
+  background: var(--surface-sunken);
+  border-color: var(--border);
+  color: var(--text-body);
+}
+
+.rst-content code.literal,
+.rst-content tt.literal {
+  color: var(--accent);
+}
+
+.rst-content div[class^="highlight"],
+.rst-content pre.literal-block {
+  border-color: var(--border);
+}
+
+/* "seealso" / "tip" style admonitions reuse the neutral box; keep
+   note/warning/danger at the theme's semantic defaults. */
+.rst-content .wy-alert-neutral.seealso a,
+.rst-content .wy-alert-neutral.tip a,
+.wy-alert.wy-alert-neutral a {
+  color: var(--accent);
+}
+
+.wy-alert.wy-alert-neutral,
+.rst-content .wy-alert-neutral.seealso,
+.rst-content .wy-alert-neutral.tip {
+  background: var(--surface-sunken);
+}
+
+/* Field list / definition headers */
+html.writer-html5
+  .rst-content
+  dl.field-list
+  > dt {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+hr,
+.rst-content .sidebar,
+.rst-content .sidebar .sidebar-title {
+  border-color: var(--border);
+}
+
+/* Headerlinks (the "¶" that appears next to headings on hover) */
+.rst-content h1 .headerlink,
+.rst-content h2 .headerlink,
+.rst-content h3 .headerlink,
+.rst-content h4 .headerlink,
+.rst-content h5 .headerlink,
+.rst-content h6 .headerlink,
+.rst-content dl dt .headerlink {
+  color: var(--text-muted);
+}

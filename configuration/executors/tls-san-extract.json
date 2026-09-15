@@ -1,0 +1,15 @@
+{
+  "name": "tls-san-extract",
+  "container": "tlsx",
+  "input": [
+    "service"
+  ],
+  "output": [
+    "domain"
+  ],
+  "max_entities": 100,
+  "max_entities_timeout": 0,
+  "workerprofile": null,
+  "keep_tmp_files": false,
+  "enabled": true
+}

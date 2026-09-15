@@ -1,0 +1,11 @@
+{
+  "data": {
+    "ipv4_address": [
+      { "address": "100.100.100.50" }
+    ]
+  },
+  "configuration": {
+    "dnsx_mode": "reverse",
+    "dns_resolver": "100.100.100.10"
+  }
+}

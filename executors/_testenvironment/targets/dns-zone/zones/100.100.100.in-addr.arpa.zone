@@ -1,0 +1,11 @@
+$TTL 60
+@       IN      SOA     ns.test.local. admin.test.local. (
+                        1       ; serial
+                        60      ; refresh
+                        60      ; retry
+                        60      ; expire
+                        60 )    ; minimum
+        IN      NS      ns.test.local.
+
+; used by the dns-reverse-resolver "resolves" test case
+50      IN      PTR     reverse.test.local.

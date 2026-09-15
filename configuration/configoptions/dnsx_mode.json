@@ -1,0 +1,5 @@
+{
+  "name": "dnsx_mode",
+  "description": "forward or reverse. Selects which of the two dnsx executors this is - required, no default.",
+  "sensitive": false
+}

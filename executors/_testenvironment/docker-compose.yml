@@ -1,0 +1,36 @@
+# "Targets" that executor containers run against during testing
+#
+# Every target gets a fixed IP on the "executor-test" network so test fixtures can reference them directly,
+# without any runtime name/IP lookup.
+#
+# Explicit project name to avoid naming collisions.
+name: executor-testenv
+
+services:
+  dns-zone:
+    build: targets/dns-zone
+    networks:
+      executor-test:
+        ipv4_address: 100.100.100.10
+
+  scan-target:
+    build: targets/scan-target
+    networks:
+      executor-test:
+        ipv4_address: 100.100.100.20
+        ipv6_address: fd00:100:100:100::20
+
+  tls-target:
+    build: targets/tls-target
+    networks:
+      executor-test:
+        ipv4_address: 100.100.100.30
+
+networks:
+  executor-test:
+    name: executor-test
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 100.100.100.0/24
+        - subnet: fd00:100:100:100::/64

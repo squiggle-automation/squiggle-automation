@@ -1,0 +1,26 @@
+{% load i18n %}
+<div class="jedison-widget"
+     data-jedison-widget
+     data-jedison-schema="{{ widget.schema_script_id }}"
+     data-jedison-error-invalid-json="{% trans "Invalid JSON" %}">
+    <input type="hidden"
+           name="{{ widget.name }}"
+           value="{{ widget.value }}"
+           id="{{ widget.attrs.id }}"
+           data-jedison-value>
+
+    {{ widget.schema|json_script:widget.schema_script_id }}
+
+    <div data-jedison-container></div>
+
+    <div hidden data-jedison-raw>
+        <textarea class="form-control" rows="12" data-jedison-textarea>{{ widget.value }}</textarea>
+        <div class="text-danger small mt-1" hidden data-jedison-raw-error></div>
+    </div>
+
+    <button type="button" class="btn btn-outline-secondary btn-sm mt-2" data-jedison-toggle
+            data-jedison-label-form-view="{% trans "Edit as form" %}"
+            data-jedison-label-raw-view="{% trans "Edit raw JSON" %}">
+        {% trans "Edit raw JSON" %}
+    </button>
+</div>

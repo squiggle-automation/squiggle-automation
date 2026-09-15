@@ -1,0 +1,30 @@
+$TTL 60
+@       IN      SOA     ns.test.local. admin.test.local. (
+                        1       ; serial
+                        60      ; refresh
+                        60      ; retry
+                        60      ; expire
+                        60 )    ; minimum
+@       IN      NS      ns.test.local.
+ns      IN      A       100.100.100.10
+
+; used by the dns-resolver "resolves" test case
+resolve IN      A       10.10.0.42
+
+; "missing.test.local" is deliberately NOT defined here, so queries for it get
+; an authoritative NXDOMAIN - used by the dns-resolver "nxdomain" test case.
+
+; used by the dnsx "forward-other-records" and "forward-axfr" test cases (cname/mx/txt/srv/ns).
+; every owner name below is explicit (not left blank) - a blank leading name in a zone file
+; inherits the *previous record's* owner, not the zone apex, which is easy to get wrong.
+@       IN      MX      10 mail.test.local.
+@       IN      TXT     "v=spf1 -all"
+alias   IN      CNAME   resolve.test.local.
+mail    IN      A       10.10.0.43
+_sip._tcp IN    SRV     10 5 5060 sipserver.test.local.
+sipserver IN    A       10.10.0.44
+
+; used by the dnsx "forward-ip-in-host-field" test case - a misconfigured MX target that is
+; itself an IP-address literal rather than a hostname, to verify it's reported as an
+; ipv4_address entity instead of a domain.
+ipmx    IN      MX      10 10.10.0.77.

@@ -1,0 +1,5 @@
+{
+  "name": "nmap_script_scan",
+  "description": "Run nmap's default scripts (nmap -sC). Default: false.",
+  "sensitive": false
+}

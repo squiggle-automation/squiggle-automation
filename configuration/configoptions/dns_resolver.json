@@ -1,0 +1,5 @@
+{
+  "name": "dns_resolver",
+  "description": "IP address of the DNS resolver to use for DNS enumeration (not all tools use it!)",
+  "sensitive": false
+}

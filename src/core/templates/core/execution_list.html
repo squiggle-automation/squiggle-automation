@@ -1,0 +1,52 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "Executions" %}</h1>
+
+<form action="{% url "core:execution-retry-all" active_project.pk %}" method="post" class="d-inline">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> {% trans "Retry all failed" %}
+    </button>
+</form>
+
+<div class="row">
+    <div class="col-12 mt-3">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" width="30%">{% trans "Executor" %}</th>
+                        <th scope="col" width="15%">{% trans "State" %}</th>
+                        <th scope="col" width="15%">{% trans "Log" %}</th>
+                        <th scope="col" width="20%">{% trans "Created at" %}</th>
+                        <th scope="col" width="20%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for execution in executions %}
+                    <tr>
+                        <td scope="row">{{ execution.executor.name }}</td>
+                        <td>{{ execution.get_state_display }}</td>
+                        <td>
+                            <span class="badge {% if execution.error_count == 0 %}bg-secondary{% else %}bg-danger{% endif %}">{{ execution.error_count }}</span>
+                            <span class="badge {% if execution.warning_count == 0 %}bg-secondary{% else %}bg-warning{% endif %}">{{ execution.warning_count }}</span>
+                            <span class="badge {% if execution.info_count == 0 %}bg-secondary{% else %}bg-info{% endif %}">{{ execution.info_count }}</span>
+                        </td>
+                        <td>{{ execution.created_at }}</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:execution-details" active_project.pk execution.pk %}">
+                                <i class="bi bi-arrow-right-circle"></i> {% trans "Details" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include "squiggle_automation/components/pagination.html" %}
+    </div>
+</div>
+{% endblock %}

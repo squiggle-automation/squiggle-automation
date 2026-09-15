@@ -1,0 +1,70 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "Projects" %}</h1>
+
+<div class="row">
+    <div class="col-12">
+        <a class="btn btn-outline-primary" href="{% url "core:project-create" %}">
+            <i class="bi bi-plus"></i> {% trans "Create project" %}
+        </a>
+    </div>
+
+    <div class="col-12 mt-3">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" width="35%">{% trans "Project" %}</th>
+                        <th scope="col" width="20%">{% trans "Run executors" %}</th>
+                        <th scope="col" width="25%">{% trans "Creation date" %}</th>
+                        <th scope="col" width="20%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in projects %}
+                    <tr>
+                        <td scope="row">
+                            {% if active_project.pk == project.pk %}
+                            <button class="btn btn-sm btn-outline-primary" disabled>
+                                    <i class="bi bi-arrow-right-circle" aria-hidden="true"></i> {% trans "Open" %}
+                            </button>
+                            {% else %}
+                            <form action="{% url "core:project-switch" %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                {{ project.switch_form }}
+                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-arrow-right-circle" aria-hidden="true"></i> {% trans "Open" %}
+                                </button>
+                            </form>
+                            {% endif %}
+                            {{ project.name }}
+                        </td>
+                        <td scope="row">
+                            {% if project.run_executors %}
+                                <i class="bi bi-check-lg"></i>
+                            {% else %}
+                                <i class="bi bi-x-lg"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ project.created_at }}</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:project-update" project.pk %}">
+                                <i class="bi bi-pencil"></i> {% trans "Edit" %}
+                            </a>
+                            <a class="btn btn-sm btn-outline-primary" href="{% url "core:project-delete" project.pk %}">
+                                <i class="bi bi-trash3"></i> {% trans "Delete" %}
+                            </a>
+
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include "squiggle_automation/components/pagination.html" %}
+    </div>
+</div>
+{% endblock %}

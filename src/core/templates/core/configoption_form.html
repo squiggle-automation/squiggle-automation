@@ -1,0 +1,27 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+{% if object %}
+    <h1>{% trans "Edit configuration" %}</h1>
+{% else %}
+    <h1>{% trans "Create configuration" %}</h1>
+{% endif %}
+
+<div class="row">
+    <div class="col-12">
+        <form method="post">
+            {% csrf_token %}
+            <h2>{% trans "Configuration" %}</h2>
+            {{ form | crispy }}
+
+            {% if value_form %}
+                <h2>{% trans "Global value" %}</h2>
+                {{ value_form | crispy }}
+            {% endif %}
+
+            <button type="submit" class="btn btn-outline-primary"><i class="bi bi-check-lg"></i> {% trans "Save" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

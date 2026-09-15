@@ -1,0 +1,5 @@
+{
+  "name": "nmap_custom_options",
+  "description": "Extra nmap command-line flags, split on whitespace and appended to the command line as-is.",
+  "sensitive": false
+}

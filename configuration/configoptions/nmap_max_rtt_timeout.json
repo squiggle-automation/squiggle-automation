@@ -1,0 +1,5 @@
+{
+  "name": "nmap_max_rtt_timeout",
+  "description": "Maximum round-trip-time timeout, nmap time syntax (e.g. \"500ms\") (nmap --max-rtt-timeout).",
+  "sensitive": false
+}

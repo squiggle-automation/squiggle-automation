@@ -1,0 +1,20 @@
+{% extends "squiggle_automation/internal.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "Entities" %} ({{ entitytype.name }})</h1>
+
+<div class="row">
+    <div class="col-12">
+        <a class="btn btn-outline-primary" href="{% url "core:entity-create" active_project.pk entitytype.name %}">
+            <i class="bi bi-plus"></i> {% trans "Create entity" %}
+        </a>
+    </div>
+
+    <div class="col-12 mt-3" hx-target:inherited="{{ list_htmx_target }}" hx-push-url:inherited="true" hx-swap:inherited="innerMorph">
+        <div id="entity-list">
+            {% include "core/entity_list_content.html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}

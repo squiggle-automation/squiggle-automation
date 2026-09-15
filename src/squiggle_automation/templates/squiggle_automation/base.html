@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{% block title %}Squiggle Automation{% endblock %}</title>
+
+    {% comment %}
+    htmx configuration:
+    - allowEval: no, so we can have a good CSP
+    - noSwap: our error messages are full pages, so do not swap them
+    {% endcomment %}
+    <meta name="htmx-config" content='{"allowEval": false, "noSwap": [204, 304, "4xx", "5xx"]}' />
+
+    <link rel="stylesheet" href="{% static 'squiggle_automation/css/fonts.css' %}" />
+
+    <link rel="stylesheet" href="{% static 'squiggle_automation/vendor/bootstrap5/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'squiggle_automation/vendor/bootstrap-icons/bootstrap-icons.min.css' %}" />
+
+    {# base.css overrides bootstrap defaults, so it must load after bootstrap.min.css #}
+    <link rel="stylesheet" href="{% static 'squiggle_automation/css/base.css' %}" />
+    <link rel="stylesheet" href="{% static 'squiggle_automation/css/sidebar.css' %}" />
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+    <div class="app-body">
+        {% block body %}
+        <main class="container-fluid app-main">
+            {% block content %}{% endblock %}
+        </main>
+        {% endblock %}
+    </div>
+
+    <script src="{% static 'squiggle_automation/vendor/bootstrap5/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'squiggle_automation/vendor/htmx/htmx.min.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

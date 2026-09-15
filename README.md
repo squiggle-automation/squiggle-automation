@@ -1,0 +1,14 @@
+# Squiggle Automation
+
+Squiggle Automation is a platform that chains tools together automatically.
+You define entity types (the data your tools work with) and executors
+(containerized tools that consume some entity types and produce others). The platform runs the right executor whenever a matching entity appears, propagating the results until nothing new is found.
+
+It ships with a small example configuration for security-reconnaissance tooling, but the entities and executors are just configuration — the platform itself is domain-agnostic.
+
+See the [documentation](docs/source/index.rst) for more details.
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0
+(AGPL-3.0) — see the [LICENSE](LICENSE) file for the full text.

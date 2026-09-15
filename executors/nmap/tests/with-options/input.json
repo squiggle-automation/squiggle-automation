@@ -1,0 +1,21 @@
+{
+  "data": {
+    "ipv4_address": [
+      { "address": "100.100.100.20" }
+    ]
+  },
+  "configuration": {
+    "nmap_scan_mode": "syn",
+    "nmap_ports": "79-81,8443",
+    "nmap_ping": "true",
+    "nmap_service_detection": "true",
+    "nmap_script_scan": "true",
+    "nmap_timing": "4",
+    "nmap_min_rate": "50",
+    "nmap_max_retries": "1",
+    "nmap_no_dns": "true",
+    "nmap_max_rtt_timeout": "500ms",
+    "nmap_min_hostgroup": "1",
+    "nmap_custom_options": "--reason"
+  }
+}

@@ -1,0 +1,26 @@
+{% load i18n %}
+<div class="modal fade" id="{{ modal_id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% blocktrans trimmed with name=modal_name %}JSON for "{{ name }}"{% endblocktrans %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans "Close" %}"></button>
+            </div>
+            <div class="modal-body">
+                <pre class="mb-0"><code id="{{ modal_id }}-content">{{ json_content }}</code></pre>
+                {% if note %}
+                    <p class="text-muted mt-2 mb-0">{{ note }}</p>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary copy-json-btn"
+                        data-clipboard-target="{{ modal_id }}-content"
+                        data-label-copy="{% trans "Copy to clipboard" %}"
+                        data-label-copied="{% trans "Copied" %}"
+                        data-label-error="{% trans "Could not copy" %}">
+                    <i class="bi bi-clipboard copy-json-btn-icon"></i> <span class="copy-json-btn-label">{% trans "Copy to clipboard" %}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
