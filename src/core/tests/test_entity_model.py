@@ -104,6 +104,24 @@ class EntitySaveTests(EntityModelTestCase):
         self.assertEqual(Event.objects.filter(entity=entity).count(), 0)
 
 
+class EntityDeferredFieldTests(EntityModelTestCase):
+    def test_init_does_not_dereference_deferred_state_and_data(self):
+        # loading an entity with state/data deferred must not touch either field in __init__ -
+        # doing so used to trigger a refresh_from_db() that builds a new instance with the
+        # *other* field deferred, whose __init__ then re-triggered a refresh_from_db() of that
+        # one, and so on forever (see wipe_platform_data, which cascade-deletes entities this way)
+        Entity.objects.create(
+            entitytype=self.entitytype, project=self.project, data={"address": "1.1.1.1"}, state=Entity.STATE_ENABLED
+        )
+
+        entity = Entity.objects.only("id", "entitytype_id", "project_id").get()
+
+        self.assertIsNone(entity._old_state)
+        self.assertIsNone(entity._old_data)
+        self.assertIn("state", entity.get_deferred_fields())
+        self.assertIn("data", entity.get_deferred_fields())
+
+
 class EntityAddEventTests(EntityModelTestCase):
     def test_add_event_creates_event_when_enabled(self):
         entity = Entity.objects.create(

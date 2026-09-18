@@ -211,8 +211,15 @@ class Entity(models.Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._old_state = self.state
-        self._old_data = self.data
+
+        # only snapshot fields that are actually loaded - touching a deferred field here would
+        # trigger a refresh_from_db() that builds a new instance with the *other* field deferred,
+        # whose __init__ would then trigger a refresh_from_db() of that one, and so on forever.
+        # This happens for example when Django's delete collector cascade-deletes entities: it
+        # only loads entitytype_id/project_id, deferring state and data.
+        deferred = self.get_deferred_fields()
+        self._old_state = self.state if "state" not in deferred else None
+        self._old_data = self.data if "data" not in deferred else None
 
     def __str__(self):
         return f"{self.entitytype}: {self.identifier_value}"
