@@ -28,8 +28,6 @@ services:
       - db
       - mq
 
-    restart: on-failure
-
   app-celery:
     image: quay.io/squiggle-automation/squiggle-automation
 
@@ -48,8 +46,6 @@ services:
       - mq
       - app
 
-    restart: on-failure
-
   # database and rabbitmq
   db:
     image: postgres
@@ -63,8 +59,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-
-    restart: on-failure
 
   mq:
     image: rabbitmq:4.2
@@ -80,8 +74,6 @@ services:
     configs:
       - source: rabbitmq-advanced-config
         target: /etc/rabbitmq/advanced.config
-
-    restart: on-failure
 
   # the workers - we assume that we have the profiles low, medium, high
   app-worker-low:
@@ -106,8 +98,6 @@ services:
       - db
       - mq
       - app
-
-    restart: on-failure
 
   app-worker-medium:
     extends:
