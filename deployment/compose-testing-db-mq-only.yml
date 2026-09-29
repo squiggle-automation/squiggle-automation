@@ -27,8 +27,26 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
       RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
 
+    volumes:
+      - mq-data:/var/lib/rabbitmq
+
+    configs:
+      - source: rabbitmq-advanced-config
+        target: /etc/rabbitmq/advanced.config
+
     ports:
       - 5672:5672
 
 volumes:
   db-data:
+  mq-data:
+
+configs:
+  rabbitmq-advanced-config:
+    content: |
+      % Celery tasks can run far longer than RabbitMQ's default timeout
+      [
+        {rabbit, [
+          {consumer_timeout, false}
+        ]}
+      ].
