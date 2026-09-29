@@ -25,6 +25,10 @@ Or install it (e.g. into a venv, or as a pipx tool) as a ``sqg`` command:
 
    sqg ...
 
+.. note::
+   If ``sqg`` is not found right after ``pipx install .``, pipx's binary directory is probably not on your ``PATH`` yet.
+   Run ``pipx ensurepath`` and open a new shell (or re-source your shell config).
+
 The following documentation assumes that the CLI can be called with the command ``sqg``.
 
 Authentication
