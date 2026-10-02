@@ -10,7 +10,7 @@ See the [documentation](docs/source/index.rst) for more details.
 
 ## Developed by HvS-Consulting
 
-![Developed by HvS-Consulting](https://github.com/squiggle-automation/squiggle-automation/blob/main/src/squiggle_automation/static/squiggle_automation/img/hvs_color.png?raw=true)
+[![Developed by HvS-Consulting](https://github.com/squiggle-automation/squiggle-automation/blob/main/src/squiggle_automation/static/squiggle_automation/img/hvs_color.png?raw=true)](https://www.hvs-consulting.de)
 
 ## License
 
