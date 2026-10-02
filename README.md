@@ -10,9 +10,11 @@ See the [documentation](docs/source/index.rst) for more details.
 
 ## Developed by HvS-Consulting
 
-![Developed by HvS-Consulting](https://github.com/squiggle-automation/squiggle-automation/blob/main/src/squiggle_automation/static/squiggle_automation/img/hvs.png?raw=true)
+![Developed by HvS-Consulting](https://github.com/squiggle-automation/squiggle-automation/blob/main/src/squiggle_automation/static/squiggle_automation/img/hvs_color.png?raw=true)
 
 ## License
 
-This project is licensed under the GNU Affero General Public License v3.0
-(AGPL-3.0) — see the [LICENSE](LICENSE) file for the full text.
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0) — see the [LICENSE](LICENSE) file for the full text.
+
+The [`executors/`](executors/) directory is an exception: it is licensed under the MIT License (see [executors/LICENSE](executors/LICENSE)).
+Changes to the platform itself must be published under the AGPL when it is offered as a network service, but your own executors are separate programs and do not have to be published. See [executors/README.md](executors/README.md).
