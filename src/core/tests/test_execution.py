@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from squiggle_automation.testutils import random_password
 
-from ..exceptions import ExecutionRetryError
+from ..exceptions import ExecutionAbortError, ExecutionRetryError
 from ..models import (
     Container,
     Entity,
@@ -284,6 +284,16 @@ class ExecutionArtifactDownloadViewTests(ExecutionTestCase):
 
 
 class ExecutionRetryViewTests(ExecutionTestCase):
+    def test_retry_aborted_execution_calls_schedule(self):
+        execution = Execution.objects.create(
+            project=self.project, executor=self.executor, state=Execution.STATE_ABORTED
+        )
+
+        with patch("core.models.execution.Execution.schedule") as mock_schedule:
+            self.client.post(reverse("core:execution-retry", kwargs={"project": self.project.pk, "pk": execution.pk}))
+
+        mock_schedule.assert_called_once()
+
     def test_retry_failed_execution_calls_schedule(self):
         execution = Execution.objects.create(project=self.project, executor=self.executor, state=Execution.STATE_FAILED)
 
@@ -315,6 +325,39 @@ class ExecutionRetryViewTests(ExecutionTestCase):
         self.assertTrue(any("cannot be retried" in str(m) for m in messages))
 
 
+class ExecutionAbortViewTests(ExecutionTestCase):
+    def _post(self, execution):
+        return self.client.post(
+            reverse("core:execution-abort", kwargs={"project": self.project.pk, "pk": execution.pk})
+        )
+
+    def test_abort_queued_and_failed_execution(self):
+        for state in (Execution.STATE_QUEUED, Execution.STATE_FAILED):
+            execution = Execution.objects.create(project=self.project, executor=self.executor, state=state)
+            r = self._post(execution)
+            self.assertEqual(r.status_code, 302)
+            execution.refresh_from_db()
+            self.assertEqual(execution.state, Execution.STATE_ABORTED)
+
+    def test_abort_running_execution_shows_error(self):
+        execution = Execution.objects.create(
+            project=self.project, executor=self.executor, state=Execution.STATE_RUNNING
+        )
+        r = self._post(execution)
+        execution.refresh_from_db()
+        self.assertEqual(execution.state, Execution.STATE_RUNNING)
+        messages = list(get_messages(r.wsgi_request))
+        self.assertTrue(any("cannot be aborted" in str(m) for m in messages))
+
+    def test_abort_other_project_returns_404(self):
+        other_project = Project.objects.create(name="project-2")
+        execution = Execution.objects.create(
+            project=other_project, executor=self.executor, state=Execution.STATE_FAILED
+        )
+        r = self.client.post(reverse("core:execution-abort", kwargs={"project": self.project.pk, "pk": execution.pk}))
+        self.assertEqual(r.status_code, 404)
+
+
 class ExecutionRetryAllViewTests(ExecutionTestCase):
     def test_retries_all_failed_executions_in_project_only(self):
         other_project = Project.objects.create(name="project-2")
@@ -323,6 +366,7 @@ class ExecutionRetryAllViewTests(ExecutionTestCase):
         Execution.objects.create(project=self.project, executor=self.executor, state=Execution.STATE_FAILED)
         Execution.objects.create(project=self.project, executor=self.executor, state=Execution.STATE_FINISHED)
         Execution.objects.create(project=other_project, executor=self.executor, state=Execution.STATE_FAILED)
+        Execution.objects.create(project=self.project, executor=self.executor, state=Execution.STATE_ABORTED)
 
         with patch("core.models.execution.Execution.schedule") as mock_schedule:
             r = self.client.post(reverse("core:execution-retry-all", kwargs={"project": self.project.pk}))
@@ -370,6 +414,30 @@ class ExecutionModelTests(TestCase):
             execution.retry()
 
         mock_schedule.assert_called_once()
+
+    def test_abort_raises_for_running_execution(self):
+        execution = Execution.objects.create(
+            project=self.project, executor=self.executor, state=Execution.STATE_RUNNING
+        )
+        with self.assertRaises(ExecutionAbortError):
+            execution.abort()
+
+    def test_retry_calls_schedule_for_aborted_execution(self):
+        execution = Execution.objects.create(
+            project=self.project, executor=self.executor, state=Execution.STATE_ABORTED
+        )
+        with patch("core.models.execution.Execution.schedule") as mock_schedule:
+            execution.retry()
+        mock_schedule.assert_called_once()
+
+    def test_run_executor_task_skips_aborted_execution(self):
+        execution = Execution.objects.create(
+            project=self.project, executor=self.executor, state=Execution.STATE_ABORTED
+        )
+        run_executor_task(execution.id)
+        execution.refresh_from_db()
+        self.assertEqual(execution.state, Execution.STATE_ABORTED)
+        self.assertEqual(execution.get_log().count(), 0)
 
     def test_schedule_fails_without_any_worker_profile_configured(self):
         execution = Execution.objects.create(project=self.project, executor=self.executor)

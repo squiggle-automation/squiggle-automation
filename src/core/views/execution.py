@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import DetailView, ListView
 
-from ..exceptions import ExecutionRetryError
+from ..exceptions import ExecutionAbortError, ExecutionRetryError
 from ..models import Execution, ExecutionLog
 from .mixins import ProjectRequiredMixin
 
@@ -115,3 +115,14 @@ class ExecutionRetryAllView(LoginRequiredMixin, ProjectRequiredMixin, View):
                 pass
 
         return redirect("core:executions", project=self.project.pk)
+
+
+class ExecutionAbortView(LoginRequiredMixin, ProjectRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        execution = get_object_or_404(Execution, pk=kwargs.get("pk"), project=self.project)
+        try:
+            execution.abort()
+        except ExecutionAbortError:
+            messages.error(request, _("Execution cannot be aborted because it is not in an allowed state for that"))
+
+        return redirect("core:execution-details", project=self.project.pk, pk=execution.id)

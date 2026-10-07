@@ -29,6 +29,12 @@ class ExecutionOutputError(ExecutionError):
 
 
 class ExecutionRetryError(ExecutionError):
-    """Execution is not retried because it did not fail"""
+    """Execution is not retried because it is not in an allowed state for that"""
+
+    pass
+
+
+class ExecutionAbortError(ExecutionError):
+    """Execution is not aborted because it is not in an allowed state for that"""
 
     pass

@@ -32,8 +32,15 @@
     <div class="col-12">
         <form action="{% url "core:execution-retry" active_project.pk execution.pk %}" method="post" class="d-inline">
             {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-primary" {% if not execution.failed and not execution.finished %}disabled{% endif %}>
+            <button type="submit" class="btn btn-sm btn-outline-primary" {% if not execution.failed and not execution.finished and not execution.aborted %}disabled{% endif %}>
                 <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> {% trans "Run again" %}
+            </button>
+        </form>
+
+        <form action="{% url "core:execution-abort" active_project.pk execution.pk %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-primary" {% if not execution.failed and not execution.queued %}disabled{% endif %}>
+                <i class="bi bi-x-octagon" aria-hidden="true"></i> {% trans "Abort" %}
             </button>
         </form>
 

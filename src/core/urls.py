@@ -26,6 +26,7 @@ from .views import (
     EntityTypeListView,
     EntityTypeUpdateView,
     EntityUpdateView,
+    ExecutionAbortView,
     ExecutionArtifactDownloadView,
     ExecutionDetailView,
     ExecutionInputEntitiesView,
@@ -149,5 +150,6 @@ urlpatterns = [
         name="execution-artifact-download",
     ),
     path("p/<int:project>/executions/<int:pk>/retry/", ExecutionRetryView.as_view(), name="execution-retry"),
+    path("p/<int:project>/executions/<int:pk>/abort/", ExecutionAbortView.as_view(), name="execution-abort"),
     path("p/<int:project>/executions/retryall/", ExecutionRetryAllView.as_view(), name="execution-retry-all"),
 ]

@@ -32,6 +32,7 @@ from .entitytype import (
     EntityTypeUpdateView,
 )
 from .execution import (
+    ExecutionAbortView,
     ExecutionArtifactDownloadView,
     ExecutionDetailView,
     ExecutionInputEntitiesView,

@@ -7,7 +7,7 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from ..exceptions import ExecutionInputError, ExecutionRetryError
+from ..exceptions import ExecutionAbortError, ExecutionInputError, ExecutionRetryError
 from .entity import Entity
 from .executionlog import ExecutionLog
 from .executor import Executor
@@ -25,6 +25,7 @@ class Execution(models.Model):
     STATE_PROCESSING_RESULTS = 5
     STATE_FINISHED = 6
     STATE_FAILED = 7
+    STATE_ABORTED = 8
 
     STATE_CHOICES = {
         STATE_FILLING: _("Filling with entities"),
@@ -34,6 +35,7 @@ class Execution(models.Model):
         STATE_PROCESSING_RESULTS: _("Processing results"),
         STATE_FINISHED: _("Finished"),
         STATE_FAILED: _("Execution failed"),
+        STATE_ABORTED: _("Aborted"),
     }
 
     project = models.ForeignKey(
@@ -119,8 +121,14 @@ class Execution(models.Model):
         # e.g. _fill_executions() calls schedule() from within a transaction.atomic() block
         transaction.on_commit(lambda: run_executor.apply_async((self.id,), queue=queue))
 
+    def abort(self):
+        """Abort a queued or failed execution. Aborted executions are not queued or started again."""
+        if not (self.failed or self.queued):
+            raise ExecutionAbortError
+        self.update_state(Execution.STATE_ABORTED)
+
     def retry(self):
-        if self.failed or self.finished:
+        if self.failed or self.finished or self.aborted:
             self.schedule()
         else:
             raise ExecutionRetryError
@@ -237,6 +245,14 @@ class Execution(models.Model):
     @property
     def failed(self):
         return self.state == Execution.STATE_FAILED
+
+    @property
+    def queued(self):
+        return self.state == Execution.STATE_QUEUED
+
+    @property
+    def aborted(self):
+        return self.state == Execution.STATE_ABORTED
 
     @property
     def finished(self):

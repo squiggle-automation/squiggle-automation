@@ -32,6 +32,12 @@ def run_executor(self, execution_id):
     executor = execution.executor
     entities = execution.entities
 
+    # the execution might have been aborted while it was waiting in the queue
+    # this does not raise an exception (compared to disabled executor etc. below) but just silently exits
+    # raising an exception causes the state failed, which allows to re-schedule the task. this is not intended here
+    if execution.aborted:
+        return
+
     try:
         # check if executor is still enabled (maybe this changed since the execution was queued)
         if not executor.enabled:
