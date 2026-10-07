@@ -10,16 +10,31 @@ from pathlib import Path
 CREDENTIALS_FILE = Path.home() / ".squiggle-automation-cli.json"
 
 
-def load_credentials():
+def load_credentials(required=True):
+    """The stored credentials - if there are none, exits, or returns {} if not required."""
     if not CREDENTIALS_FILE.exists():
+        if not required:
+            return {}
         print(f"not logged in - run '{sys.argv[0]} login' first", file=sys.stderr)
         sys.exit(1)
     return json.loads(CREDENTIALS_FILE.read_text())
 
 
-def save_credentials(url, token):
-    CREDENTIALS_FILE.write_text(json.dumps({"url": url, "token": token}, indent=2) + "\n")
+def save_credentials(url, token, project=None):
+    credentials = {"url": url, "token": token}
+    if project is not None:
+        credentials["project"] = project
+    CREDENTIALS_FILE.write_text(json.dumps(credentials, indent=2) + "\n")
     CREDENTIALS_FILE.chmod(0o600)  # holds a secret token - keep it readable by the owner only
+
+
+def get_project(args, creds):
+    """The project from --project argument, or else the default stored by login."""
+    project = args.project if args.project is not None else creds.get("project")
+    if project is None:
+        print("no project given - use --project or set a default with 'sqg login'", file=sys.stderr)
+        sys.exit(1)
+    return project
 
 
 def api_request(url, token, method, path, data=None):

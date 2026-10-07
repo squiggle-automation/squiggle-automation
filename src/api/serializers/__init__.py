@@ -3,6 +3,7 @@ from .base import ValidatedModelSerializer
 from .configoption import ConfigOptionSerializer
 from .configvalue import ConfigValueSerializer
 from .container import ContainerSerializer
+from .entity import EntitySerializer
 from .entitytype import EntityTypeSerializer
 from .executor import ExecutorSerializer
 from .project import ProjectSerializer

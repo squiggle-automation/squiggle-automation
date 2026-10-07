@@ -40,7 +40,10 @@ Authentication
 
 Prompts for the API URL and a token (generate one for your user via the web UI's "API token"
 page), verifies them against the API, and stores them in ``~/.sqg.json`` for
-every other command to reuse. Re-running ``login`` overwrites the stored credentials.
+every other command to reuse. Re-running ``login`` shows the stored values (the token
+masked), and keeps each one if the input is left empty.
+
+Optionally, a default project id can be given.
 
 This is not required for executor builds and tests (no API communication required).
 
@@ -62,6 +65,35 @@ The ``"name"`` field is used to identify the object.
 Since executors reference containers, entity types and worker profiles by name, and containers
 reference config options, import order matters when setting up from scratch.
 It is recommended to create a custom import script like ``configuration/import.sh``.
+
+Entities
+========
+
+.. code-block:: shell
+
+   sqg entity get <entitytype> [--project ID] [--state enabled|waiting_approval|disabled|all]
+   sqg entity add <entitytype> [--project ID] key=value [key:=json ...]
+   sqg entity add <entitytype> [--project ID] --file <path|->
+
+``<entitytype>`` is the name of the entity type (e.g. ``domain``). ``--project`` defaults to the project stored by ``login``.
+
+``get`` prints the entities as JSON (``[{"data": {...}, "state": "..."}]``), by default only the enabled ones - ``--state all`` prints all of them:
+
+.. code-block:: shell
+
+   sqg entity get domain | jq -r '.[].data.name'
+
+``add`` adds a single entity from ``key=value`` (string) and ``key:=json`` (typed, e.g. ``port:=443``) fields,
+or entities from ``--file``: a ``.json`` file, a folder of ``.json`` files, or ``-`` for stdin, each holding one
+entity (``{"data": {...}}``) or a list of them - the format ``get`` prints:
+
+.. code-block:: shell
+
+   sqg entity add service address=1.2.3.4 port:=443 protocol=tcp
+   sqg entity get domain --project 1 | sqg entity add domain --project 2 --file -
+
+Each entity is reported as ``created`` or ``updated`` - entities are identified by the identifier keys of their entity type, so re-running ``add`` is safe.
+New entities follow the approval settings of the entity type, existing ones keep their state.
 
 Config values
 =============

@@ -1,7 +1,8 @@
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
@@ -10,6 +11,7 @@ from core.models import (
     AutoApprovalRule,
     ConfigOption,
     Container,
+    Entity,
     EntityType,
     Executor,
     Project,
@@ -21,11 +23,13 @@ from .serializers import (
     ConfigOptionSerializer,
     ConfigValueSerializer,
     ContainerSerializer,
+    EntitySerializer,
     EntityTypeSerializer,
     ExecutorSerializer,
     ProjectSerializer,
     WorkerProfileSerializer,
 )
+from .serializers.entity import STATE_NAMES
 from .utils import masked_configvalue, set_configvalue
 
 
@@ -55,6 +59,54 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class AutoApprovalRuleViewSet(ProjectScopedViewSetMixin, viewsets.ModelViewSet):
     queryset = AutoApprovalRule.objects.all()
     serializer_class = AutoApprovalRuleSerializer
+
+
+class EntityView(ProjectScopedViewSetMixin, generics.GenericAPIView):
+    """
+    GET returns the entities of one entity type in one project, PUT imports (creates or updates) a single one.
+
+    Entities are identified by the identifier keys in their data, so there is no detail URL - PUT is an upserts operation instead.
+    """
+
+    queryset = Entity.objects.all()
+    serializer_class = EntitySerializer
+    # no queryset-based filtering/pagination here - GET returns a plain list, see get()
+    # TODO: add pagination
+    pagination_class = None
+
+    @extend_schema(
+        parameters=[OpenApiParameter("state", enum=list(STATE_NAMES.values()), required=False)],
+        responses=EntitySerializer(many=True),
+    )
+    def get(self, request, project, entitytype):
+        entitytype = get_object_or_404(EntityType, name=entitytype)
+
+        # get_queryset() is already limited to the project of the URL
+        entities = self.get_queryset().filter(entitytype=entitytype)
+
+        state = request.query_params.get("state")
+        if state is not None:
+            states_by_name = {name: value for value, name in STATE_NAMES.items()}
+            if state not in states_by_name:
+                raise DRFValidationError({"state": f"Unknown state, must be one of: {', '.join(states_by_name)}"})
+            entities = entities.filter(state=states_by_name[state])
+
+        entities = entities.order_entity_by_values(entitytype)
+        return Response(EntitySerializer(entities, many=True).data)
+
+    @extend_schema(request=EntitySerializer, responses={200: EntitySerializer, 201: EntitySerializer})
+    def put(self, request, project, entitytype):
+        project = self.get_project()
+        entitytype = get_object_or_404(EntityType, name=entitytype)
+
+        # the serializer validates the data against the schema of the entity type
+        serializer = EntitySerializer(data=request.data, context={"entitytype": entitytype})
+        serializer.is_valid(raise_exception=True)
+
+        entity, created = Entity.objects.upsert_entity(entitytype, project, serializer.validated_data["data"])
+        return Response(
+            EntitySerializer(entity).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
 
 
 class EntityTypeViewSet(viewsets.ModelViewSet):

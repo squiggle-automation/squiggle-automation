@@ -1,6 +1,7 @@
 import argparse
 
 from .cmd.config import cmd_config_get, cmd_config_set
+from .cmd.entity import STATES, cmd_entity_add, cmd_entity_get
 from .cmd.executor import cmd_executor_build, cmd_executor_push, cmd_executor_test
 from .cmd.importer import DATATYPES, cmd_import
 from .cmd.login import cmd_login
@@ -12,7 +13,21 @@ def main():
 
     subparsers.add_parser("login", help="store the API URL and token for later commands")
 
-    import_parser = subparsers.add_parser("import", help="import objects from JSON files via the API")
+    entity_parser = subparsers.add_parser("entity", help="get or add entities of one entity type")
+    entity_subparsers = entity_parser.add_subparsers(dest="entity_command", required=True)
+    entity_get_parser = entity_subparsers.add_parser("get", help="print the entities of an entity type as JSON")
+    entity_get_parser.add_argument("entitytype", help="entity type name")
+    entity_get_parser.add_argument("--project", type=int, help="project id (default: the one stored by login)")
+    entity_get_parser.add_argument("--state", choices=STATES, default="enabled", help="default: enabled")
+    entity_add_parser = entity_subparsers.add_parser("add", help="add (or update) entities of an entity type")
+    entity_add_parser.add_argument("entitytype", help="entity type name")
+    entity_add_parser.add_argument("fields", nargs="*", help="key=value (string) or key:=json (e.g. port:=443)")
+    entity_add_parser.add_argument("--project", type=int, help="project id (default: the one stored by login)")
+    entity_add_parser.add_argument(
+        "--file", help='.json file, directory of .json files, or - for stdin; each {"data": {...}} or a list of these'
+    )
+
+    import_parser = subparsers.add_parser("import", help="import configuration objects from JSON files via the API")
     import_parser.add_argument("datatype", choices=DATATYPES)
     import_parser.add_argument("folder", help="directory containing one .json file per object")
 
@@ -63,6 +78,10 @@ def main():
         cmd_login(args)
     elif args.command == "import":
         cmd_import(args)
+    elif args.command == "entity" and args.entity_command == "get":
+        cmd_entity_get(args)
+    elif args.command == "entity" and args.entity_command == "add":
+        cmd_entity_add(args)
     elif args.command == "config" and args.config_command == "set":
         cmd_config_set(args)
     elif args.command == "config" and args.config_command == "get":

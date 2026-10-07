@@ -6,6 +6,7 @@ from .views import (
     ConfigOptionViewSet,
     ContainerViewSet,
     EntityTypeViewSet,
+    EntityView,
     ExecutorViewSet,
     ProjectViewSet,
     WorkerProfileViewSet,
@@ -36,5 +37,12 @@ urlpatterns = [
             {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}
         ),
         name="autoapprovalrule-detail",
+    ),
+    # entities are scoped to their project and entity type via the URL, and identified by the
+    # identifier keys in their data - hence only a collection URL (GET to export, PUT to import)
+    path(
+        "v1/projects/<int:project>/entities/<str:entitytype>/",
+        EntityView.as_view(),
+        name="entity-list",
     ),
 ]
