@@ -1,0 +1,8 @@
+{
+  "entitytype": "ipv4_address",
+  "name": "scope_ipv4_addresses",
+  "field": "address",
+  "operator": "ip_in_range",
+  "values": "127.0.0.1/24",
+  "action": "approve"
+}

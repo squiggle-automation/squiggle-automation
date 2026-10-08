@@ -52,9 +52,11 @@ Importing objects
 
 .. code-block:: shell
 
-   sqg import <datatype> <folder>
+   sqg import <datatype> <folder> [--project ID]
 
-``<datatype>`` is one of ``entitytypes``, ``configoptions``, ``containers``, ``executors``, ``workerprofiles``.
+``<datatype>`` is one of ``entitytypes``, ``configoptions``, ``containers``, ``executors``, ``workerprofiles``, ``autoapprovalrules``.
+
+Auto-approval rules belong to a project: ``--project`` defaults to the project stored by ``login``.
 
 ``<folder>`` contains one ``.json`` file per object in the format that is also used by the API.
 The JSON content can also be displayed in the web UI.
@@ -63,7 +65,7 @@ Re-running an import is safe, the object it either created or updated.
 The ``"name"`` field is used to identify the object.
 
 Since executors reference containers, entity types and worker profiles by name, and containers
-reference config options, import order matters when setting up from scratch.
+reference config options, import order matters when setting up from scratch. Auto-approval rules reference entity types by name.
 It is recommended to create a custom import script like ``configuration/import.sh``.
 
 Entities

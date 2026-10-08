@@ -32,7 +32,7 @@ urlpatterns = [
         name="autoapprovalrule-list",
     ),
     path(
-        "v1/projects/<int:project>/autoapprovalrules/<int:pk>/",
+        "v1/projects/<int:project>/autoapprovalrules/<str:name>/",
         AutoApprovalRuleViewSet.as_view(
             {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}
         ),

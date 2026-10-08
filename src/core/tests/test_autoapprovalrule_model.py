@@ -196,10 +196,18 @@ class EvaluateAutoApprovalRulesTests(AutoApprovalRuleTestCase):
 
     def test_decline_wins_over_approve(self):
         self.make_rule(
-            field="address", operator=OPERATOR_STRING_EQUALS_SENSITIVE, values="1.1.1.1", action=ACTION_APPROVE
+            name="approve",
+            field="address",
+            operator=OPERATOR_STRING_EQUALS_SENSITIVE,
+            values="1.1.1.1",
+            action=ACTION_APPROVE,
         )
         self.make_rule(
-            field="address", operator=OPERATOR_STRING_EQUALS_SENSITIVE, values="1.1.1.1", action=ACTION_DECLINE
+            name="decline",
+            field="address",
+            operator=OPERATOR_STRING_EQUALS_SENSITIVE,
+            values="1.1.1.1",
+            action=ACTION_DECLINE,
         )
 
         state = evaluate_all_auto_approval_rules_on_entity(self.project, self.entitytype, {"address": "1.1.1.1"})

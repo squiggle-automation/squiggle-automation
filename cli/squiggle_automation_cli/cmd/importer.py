@@ -1,17 +1,22 @@
-"""Upserts one object per JSON file in a folder, by name, via the API."""
+"""
+Upserts one object per JSON file in a folder, by name, via the API - globally, or into a project
+for the project-scoped datatypes.
+"""
 
 import json
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
-from ..utils import api_request, load_credentials
+from ..utils import api_request, get_project, load_credentials
 
-DATATYPES = ["entitytypes", "configoptions", "containers", "executors", "workerprofiles"]
+DATATYPES = ["entitytypes", "configoptions", "containers", "executors", "workerprofiles", "autoapprovalrules"]
+
+# nested under /projects/<project>/ in the API
+PROJECT_DATATYPES = ["autoapprovalrules"]
 
 
 def cmd_import(args):
-    print(f"Importing {args.datatype}")
-
     folder = Path(args.folder)
     if not folder.is_dir():
         print(f"'{folder}' is not a directory", file=sys.stderr)
@@ -19,6 +24,14 @@ def cmd_import(args):
 
     creds = load_credentials()
     url, token = creds["url"], creds["token"]
+
+    if args.datatype in PROJECT_DATATYPES:
+        project = get_project(args, creds)
+        print(f"Importing {args.datatype} into project {project}")
+        base = f"projects/{project}/{args.datatype}"
+    else:
+        print(f"Importing {args.datatype}")
+        base = args.datatype
 
     files = sorted(folder.glob("*.json"))
     if not files:
@@ -42,13 +55,15 @@ def cmd_import(args):
 
         # upsert by name: update if it already exists, otherwise create - re-running an import
         # is safe
-        status, existing = api_request(url, token, "GET", f"{args.datatype}/{name}/")
+        # quoted, since names (e.g. of auto approval rules) may contain spaces
+        detail = f"{base}/{quote(name, safe='')}/"
+        status, existing = api_request(url, token, "GET", detail)
         if status == 200:
             verb = "updated"
-            status, result = api_request(url, token, "PUT", f"{args.datatype}/{name}/", payload)
+            status, result = api_request(url, token, "PUT", detail, payload)
         elif status == 404:
             verb = "created"
-            status, result = api_request(url, token, "POST", f"{args.datatype}/", payload)
+            status, result = api_request(url, token, "POST", f"{base}/", payload)
         else:
             print(f"FAIL {file.name}: lookup failed ({status}): {existing}")
             failures += 1

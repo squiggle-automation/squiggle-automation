@@ -1,0 +1,8 @@
+{
+  "entitytype": "domain",
+  "name": "scope_domains",
+  "field": "domain",
+  "operator": "is_subdomain",
+  "values": "example.org",
+  "action": "approve"
+}

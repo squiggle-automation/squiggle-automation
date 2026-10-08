@@ -30,6 +30,9 @@ def main():
     import_parser = subparsers.add_parser("import", help="import configuration objects from JSON files via the API")
     import_parser.add_argument("datatype", choices=DATATYPES)
     import_parser.add_argument("folder", help="directory containing one .json file per object")
+    import_parser.add_argument(
+        "--project", type=int, help="project id for project-scoped data (default: the one stored by login)"
+    )
 
     config_parser = subparsers.add_parser("config", help="manage config values")
     config_subparsers = config_parser.add_subparsers(dest="config_command", required=True)

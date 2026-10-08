@@ -59,6 +59,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class AutoApprovalRuleViewSet(ProjectScopedViewSetMixin, viewsets.ModelViewSet):
     queryset = AutoApprovalRule.objects.all()
     serializer_class = AutoApprovalRuleSerializer
+    lookup_field = "name"
 
 
 class EntityView(ProjectScopedViewSetMixin, generics.GenericAPIView):

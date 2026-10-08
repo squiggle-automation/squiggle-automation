@@ -13,4 +13,11 @@ class AutoApprovalRuleSerializer(ValidatedModelSerializer):
 
     class Meta:
         model = AutoApprovalRule
-        fields = ["id", "entitytype", "name", "field", "operator", "values", "action"]
+        fields = ["entitytype", "name", "field", "operator", "values", "action"]
+
+    def get_validation_instance(self):
+        # on create, the project (from the URL) is needed for the unique name check in clean()
+        instance = super().get_validation_instance()
+        if instance.project_id is None:
+            instance.project = self.context["view"].get_project()
+        return instance

@@ -73,10 +73,13 @@ class AutoApprovalRuleApiTests(TestCase):
             action=ACTION_APPROVE,
         )
 
-        r = self.client.get(reverse("api:autoapprovalrule-detail", kwargs={"project": self.project.pk, "pk": rule.pk}))
+        r = self.client.get(
+            reverse("api:autoapprovalrule-detail", kwargs={"project": self.project.pk, "name": rule.name})
+        )
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.data["entitytype"], self.entitytype.name)
         self.assertNotIn("project", r.data)
+        self.assertNotIn("id", r.data)
 
     def test_retrieve_autoapprovalrule_of_other_project_is_404(self):
         rule = AutoApprovalRule.objects.create(
@@ -89,7 +92,9 @@ class AutoApprovalRuleApiTests(TestCase):
             action=ACTION_APPROVE,
         )
 
-        r = self.client.get(reverse("api:autoapprovalrule-detail", kwargs={"project": self.project.pk, "pk": rule.pk}))
+        r = self.client.get(
+            reverse("api:autoapprovalrule-detail", kwargs={"project": self.project.pk, "name": rule.name})
+        )
         self.assertEqual(r.status_code, 404)
 
     def test_create_autoapprovalrule_is_scoped_to_the_url_project(self):
@@ -128,6 +133,57 @@ class AutoApprovalRuleApiTests(TestCase):
         self.assertIn("field", r.data)
         self.assertFalse(AutoApprovalRule.objects.filter(name="bad-field-rule").exists())
 
+    def test_create_autoapprovalrule_with_duplicate_name_is_rejected(self):
+        AutoApprovalRule.objects.create(
+            project=self.project,
+            entitytype=self.entitytype,
+            name="taken",
+            field="address",
+            operator=OPERATOR_STRING_EQUALS_SENSITIVE,
+            values="1.1.1.1",
+            action=ACTION_APPROVE,
+        )
+        payload = {
+            "entitytype": self.entitytype.name,
+            "name": "taken",
+            "field": "address",
+            "operator": OPERATOR_STRING_EQUALS_SENSITIVE,
+            "values": "2.2.2.2",
+            "action": ACTION_APPROVE,
+        }
+
+        r = self.client.post(
+            reverse("api:autoapprovalrule-list", kwargs={"project": self.project.pk}), payload, format="json"
+        )
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("name", r.data)
+
+        # the same name in another project is fine
+        r = self.client.post(
+            reverse("api:autoapprovalrule-list", kwargs={"project": self.other_project.pk}), payload, format="json"
+        )
+        self.assertEqual(r.status_code, 201, r.content)
+
+    def test_rename_autoapprovalrule_to_existing_name_is_rejected(self):
+        for name in ("first", "second"):
+            AutoApprovalRule.objects.create(
+                project=self.project,
+                entitytype=self.entitytype,
+                name=name,
+                field="address",
+                operator=OPERATOR_STRING_EQUALS_SENSITIVE,
+                values="1.1.1.1",
+                action=ACTION_APPROVE,
+            )
+
+        r = self.client.patch(
+            reverse("api:autoapprovalrule-detail", kwargs={"project": self.project.pk, "name": "second"}),
+            {"name": "first"},
+            format="json",
+        )
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("name", r.data)
+
     def test_update_autoapprovalrule(self):
         rule = AutoApprovalRule.objects.create(
             project=self.project,
@@ -140,7 +196,7 @@ class AutoApprovalRuleApiTests(TestCase):
         )
 
         r = self.client.patch(
-            reverse("api:autoapprovalrule-detail", kwargs={"project": self.project.pk, "pk": rule.pk}),
+            reverse("api:autoapprovalrule-detail", kwargs={"project": self.project.pk, "name": rule.name}),
             {"values": "2.2.2.2"},
             format="json",
         )
@@ -161,7 +217,7 @@ class AutoApprovalRuleApiTests(TestCase):
         )
 
         r = self.client.delete(
-            reverse("api:autoapprovalrule-detail", kwargs={"project": self.project.pk, "pk": rule.pk})
+            reverse("api:autoapprovalrule-detail", kwargs={"project": self.project.pk, "name": rule.name})
         )
         self.assertEqual(r.status_code, 204)
         self.assertFalse(AutoApprovalRule.objects.filter(pk=rule.pk).exists())

@@ -119,6 +119,31 @@ class AutoApprovalRuleCreateViewTests(AutoApprovalRuleTestCase):
         self.assertEqual(r.status_code, 200)
         self.assertFalse(AutoApprovalRule.objects.filter(name="rule-1").exists())
 
+    def test_post_duplicate_name_is_rejected(self):
+        AutoApprovalRule.objects.create(
+            project=self.project,
+            entitytype=self.entitytype,
+            name="rule-1",
+            field="address",
+            operator=OPERATOR_STRING_EQUALS_SENSITIVE,
+            values="1.1.1.1",
+            action=ACTION_APPROVE,
+        )
+
+        r = self.client.post(
+            reverse("core:autoapprovalrule-create", kwargs={"project": self.project.pk}),
+            {
+                "entitytype": self.entitytype.pk,
+                "name": "rule-1",
+                "field": "address",
+                "operator": OPERATOR_STRING_EQUALS_SENSITIVE,
+                "values": "2.2.2.2",
+                "action": ACTION_APPROVE,
+            },
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(AutoApprovalRule.objects.filter(name="rule-1").count(), 1)
+
 
 class AutoApprovalRuleUpdateViewTests(AutoApprovalRuleTestCase):
     def setUp(self):

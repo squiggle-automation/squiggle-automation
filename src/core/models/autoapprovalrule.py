@@ -83,6 +83,10 @@ OPERATOR_FUNCTIONS = {
 class AutoApprovalRule(models.Model):
     class Meta:
         ordering = ["project", "entitytype", "name"]
+        # the API identifies a rule by its name within the project
+        constraints = [
+            models.UniqueConstraint(fields=["project", "name"], name="autoapprovalrule_unique_project_name"),
+        ]
 
     project = models.ForeignKey(
         Project,
@@ -144,6 +148,13 @@ class AutoApprovalRule(models.Model):
             defined_keys = self.entitytype.schema.get("properties", {}).keys()
             if self.field not in defined_keys:
                 raise ValidationError({"field": _("Field is not defined in the schema of the entity type.")})
+
+        # checked here because project is not part of the web form or the API serializer (it comes
+        # from the URL), so their own unique validation skips the constraint above
+        if self.project_id:
+            duplicates = AutoApprovalRule.objects.filter(project_id=self.project_id, name=self.name).exclude(pk=self.pk)
+            if duplicates.exists():
+                raise ValidationError({"name": _("A rule with this name already exists in this project.")})
 
     @property
     def values_list(self):
