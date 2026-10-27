@@ -3,6 +3,6 @@
   "image": "quay.io/squiggle-automation/executor-tlsx",
   "image_tag": "latest",
   "cap_net_raw": false,
-  "net_host": false,
+  "net_host": true,
   "configoptions": []
 }

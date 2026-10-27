@@ -1,0 +1,11 @@
+{
+  "data": {
+    "ipv4_address": [
+      { "ipv4_address": "100.100.100.20" }
+    ]
+  },
+  "configuration": {
+    "nmap_ports": "79-81,8443",
+    "nmap_return_ip_entities": "true"
+  }
+}

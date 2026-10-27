@@ -1,7 +1,7 @@
 {
   "data": {
     "ipv6_address": [
-      { "address": "fd00:100:100:100::20" }
+      { "ipv6_address": "fd00:100:100:100::20" }
     ]
   },
   "configuration": {

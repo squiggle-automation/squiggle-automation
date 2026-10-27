@@ -20,6 +20,7 @@ config_min_rate = executor.get_config("nmap_min_rate")
 config_no_dns = executor.get_config_bool("nmap_no_dns", "false")
 config_ping = executor.get_config_bool("nmap_ping", False)
 config_ports = executor.get_config("nmap_ports")
+config_return_ip_entities = executor.get_config_bool("nmap_return_ip_entities", "false")
 config_scan_mode = executor.get_config_choices("nmap_scan_mode", "syn", choices=["syn", "connect", "udp"])
 config_script_scan = executor.get_config_bool("nmap_script_scan", False)
 config_service_detection = executor.get_config_bool("nmap_service_detection", False)
@@ -34,20 +35,26 @@ if not config_ports and not config_top_ports:
 executor.exit_on_error()
 
 # nmap can't mix address families in one run (IPv6 targets need "-6"), so IPv4 and IPv6
-# addresses are scanned separately
+# targets are scanned separately; ipv4_range entries (CIDR notation) go into the same
+# target file as ipv4_address entries, nmap accepts both in one -iL file
+ipv4_targets = [i["ipv4_address"] for i in executor.get_input_entities("ipv4_address")]
+ipv4_targets += [i["cidr"] for i in executor.get_input_entities("ipv4_range")]
+
+ipv6_targets = [i["ipv6_address"] for i in executor.get_input_entities("ipv6_address")]
+
 scans = [
-    ("ipv4", executor.get_input_entities("ipv4_address"), []),
-    ("ipv6", executor.get_input_entities("ipv6_address"), ["-6"]),
+    ("ipv4", ipv4_targets, []),
+    ("ipv6", ipv6_targets, ["-6"]),
 ]
 
-for family, addresses, extra_args in scans:
-    if not addresses:
+for family, targets, extra_args in scans:
+    if not targets:
         continue
 
     target_file = f"/data/tmp/{family}.txt"
     with open(target_file, "w") as f:
-        for i in addresses:
-            f.write(i["address"] + os.linesep)
+        for t in targets:
+            f.write(t + os.linesep)
 
     # "-oA" writes normal, XML and grepable output to /data/artifacts/nmap-<family>.*, so the
     # raw tool output is preserved as an artifact and the XML file can be parsed below
@@ -69,6 +76,11 @@ for family, addresses, extra_args in scans:
     elif config_scan_mode == "udp":
         nmap_command.append("-sU")
 
+    if config_service_detection:
+        nmap_command.append("-sV")
+    if config_script_scan:
+        nmap_command.append("-sC")
+
     if not config_ping:
         nmap_command.append("-Pn")
 
@@ -79,10 +91,6 @@ for family, addresses, extra_args in scans:
         nmap_command.append("--top-ports")
         nmap_command.append(config_top_ports)
 
-    if config_service_detection:
-        nmap_command.append("-sV")
-    if config_script_scan:
-        nmap_command.append("-sC")
     if config_timing:
         nmap_command.append(f"-T{config_timing}")
     if config_min_rate:
@@ -116,13 +124,17 @@ for family, addresses, extra_args in scans:
         if ports_el is None:
             continue
 
+        host_has_open_port = False
+
         for port_el in ports_el.findall("port"):
             state_el = port_el.find("state")
             if state_el is None or state_el.get("state") != "open":
                 continue
 
+            host_has_open_port = True
+
             service_entity = {
-                "address": address,
+                "ip_address": address,
                 "port": int(port_el.get("portid")),
                 "protocol": port_el.get("protocol"),
                 "service": "",
@@ -146,6 +158,10 @@ for family, addresses, extra_args in scans:
                     service_entity["info"] = info
 
             executor.add_output_entity("service", service_entity)
+
+        if config_return_ip_entities and host_has_open_port:
+            entitytype = f"{family}_address"
+            executor.add_output_entity(entitytype, {entitytype: address})
 
 # write output file
 executor.write_output()

@@ -1,0 +1,5 @@
+{
+  "name": "nmap_return_ip_entities",
+  "description": "Also report every scanned host with at least one open port as an ipv4_address/ipv6_address entity. Default: false.",
+  "sensitive": false
+}

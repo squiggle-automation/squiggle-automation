@@ -1,7 +1,7 @@
 {
   "data": {
     "domain": [
-      { "domain": "missing.test.local" }
+      { "fqdn": "missing.test.local" }
     ]
   },
   "configuration": {

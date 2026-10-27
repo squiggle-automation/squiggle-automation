@@ -1,7 +1,7 @@
 {
   "data": {
     "domain": [
-      { "domain": "ipmx.test.local" }
+      { "fqdn": "ipmx.test.local" }
     ]
   },
   "configuration": {

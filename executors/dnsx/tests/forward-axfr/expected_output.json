@@ -7,28 +7,28 @@
   ],
   "data": {
     "ipv4_address": [
-      { "address": "10.10.0.43" },
-      { "address": "10.10.0.43" },
-      { "address": "100.100.100.10" },
-      { "address": "100.100.100.10" },
-      { "address": "10.10.0.42" },
-      { "address": "10.10.0.42" },
-      { "address": "10.10.0.44" },
-      { "address": "10.10.0.44" },
-      { "address": "10.10.0.77" },
-      { "address": "10.10.0.77" }
+      { "ipv4_address": "10.10.0.43" },
+      { "ipv4_address": "10.10.0.43" },
+      { "ipv4_address": "100.100.100.10" },
+      { "ipv4_address": "100.100.100.10" },
+      { "ipv4_address": "10.10.0.42" },
+      { "ipv4_address": "10.10.0.42" },
+      { "ipv4_address": "10.10.0.44" },
+      { "ipv4_address": "10.10.0.44" },
+      { "ipv4_address": "10.10.0.77" },
+      { "ipv4_address": "10.10.0.77" }
     ],
     "domain": [
-      { "domain": "mail.test.local" },
-      { "domain": "mail.test.local" },
-      { "domain": "mail.test.local" },
-      { "domain": "ns.test.local" },
-      { "domain": "ns.test.local" },
-      { "domain": "ns.test.local" },
-      { "domain": "resolve.test.local" },
-      { "domain": "resolve.test.local" },
-      { "domain": "sipserver.test.local" },
-      { "domain": "sipserver.test.local" }
+      { "fqdn": "mail.test.local" },
+      { "fqdn": "mail.test.local" },
+      { "fqdn": "mail.test.local" },
+      { "fqdn": "ns.test.local" },
+      { "fqdn": "ns.test.local" },
+      { "fqdn": "ns.test.local" },
+      { "fqdn": "resolve.test.local" },
+      { "fqdn": "resolve.test.local" },
+      { "fqdn": "sipserver.test.local" },
+      { "fqdn": "sipserver.test.local" }
     ]
   }
 }

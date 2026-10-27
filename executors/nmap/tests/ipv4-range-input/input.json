@@ -1,0 +1,10 @@
+{
+  "data": {
+    "ipv4_range": [
+      { "cidr": "100.100.100.20/31" }
+    ]
+  },
+  "configuration": {
+    "nmap_ports": "79-81,8443"
+  }
+}

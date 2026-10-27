@@ -1,0 +1,14 @@
+{
+  "errors": [],
+  "warnings": [],
+  "infos": [],
+  "data": {
+    "service": [
+      { "ip_address": "100.100.100.20", "port": 80, "protocol": "tcp", "service": "http", "info": "" },
+      { "ip_address": "100.100.100.20", "port": 8443, "protocol": "tcp", "service": "https-alt", "info": "" }
+    ],
+    "ipv4_address": [
+      { "ipv4_address": "100.100.100.20" }
+    ]
+  }
+}

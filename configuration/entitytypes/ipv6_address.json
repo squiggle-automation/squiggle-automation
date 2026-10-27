@@ -3,15 +3,15 @@
   "schema": {
     "type": "object",
     "required": [
-      "address"
+      "ipv6_address"
     ],
     "properties": {
-      "address": {
+      "ipv6_address": {
         "type": "string",
         "format": "ipv6"
       }
     }
   },
-  "identifier_keys": "address",
+  "identifier_keys": "ipv6_address",
   "approval_required": true
 }

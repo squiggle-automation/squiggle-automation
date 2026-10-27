@@ -13,7 +13,7 @@ executor.read_input()
 domains = executor.get_input_entities("domain")
 with open("/data/tmp/domains.txt", "w") as f:
     for d in domains:
-        f.write(d["domain"] + "\n")
+        f.write(d["fqdn"] + "\n")
 
 # run subfinder - "-json -output" writes one JSON object per discovered host to
 # /data/artifacts/subfinder.json, so the raw tool output is preserved as an artifact
@@ -49,7 +49,7 @@ except FileNotFoundError:
     executor.exit_on_error()
 
 for host in sorted(hosts):
-    executor.add_output_entity("domain", {"domain": host})
+    executor.add_output_entity("domain", {"fqdn": host})
 
 # write output file
 executor.write_output()

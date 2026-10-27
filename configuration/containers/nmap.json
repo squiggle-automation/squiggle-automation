@@ -13,6 +13,7 @@
     "nmap_no_dns",
     "nmap_ping",
     "nmap_ports",
+    "nmap_return_ip_entities",
     "nmap_scan_mode",
     "nmap_script_scan",
     "nmap_service_detection",

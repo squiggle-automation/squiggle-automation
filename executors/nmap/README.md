@@ -7,12 +7,15 @@ in one run), each using the same scan options.
 
 ## Input data types
 
-- `ipv4_address` (`address`)
-- `ipv6_address` (`address`)
+- `ipv4_address`
+- `ipv4_range`
+- `ipv6_address`
 
 ## Output data types
 
 - `service`
+- `ipv4_address` / `ipv6_address` - only with `nmap_return_ip_entities` enabled, one entity per
+  scanned host that has at least one open port.
 
 ## Config
 
@@ -30,6 +33,8 @@ in one run), each using the same scan options.
 - `nmap_min_hostgroup` (optional) - `--min-hostgroup`.
 - `nmap_custom_options` (optional) - extra raw nmap flags, split on whitespace and appended to
   the command line as-is.
+- `nmap_return_ip_entities` (optional, default `false`) - additionally report each scanned host
+  that has at least one open port as an `ipv4_address`/`ipv6_address` entity.
 
 ## Known issues
 

@@ -1,7 +1,7 @@
 {
   "data": {
     "domain": [
-      { "domain": "resolve.test.local" }
+      { "fqdn": "resolve.test.local" }
     ]
   },
   "configuration": {

@@ -1,0 +1,17 @@
+$TTL 60
+@       IN      SOA     ns.test.local. admin.test.local. (
+                        1       ; serial
+                        60      ; refresh
+                        60      ; retry
+                        60      ; expire
+                        60 )    ; minimum
+@       IN      NS      ns.test.local.
+
+; used by the ad-enum-dcs "enumerates" test case - dc1 doubles as the PDC and is reachable
+; (it resolves to the dns-zone container itself); dc2 has no container behind it, so it is
+; reachable via DNS but not via ping - covers both the "found" and "unreachable" branches.
+_kerberos._udp          IN      SRV     0 100 88  dc1.ad.test.local.
+_kerberos._udp          IN      SRV     0 100 88  dc2.ad.test.local.
+_ldap._tcp.pdc._msdcs   IN      SRV     0 100 389 dc1.ad.test.local.
+dc1                     IN      A       100.100.100.10
+dc2                     IN      A       100.100.100.99

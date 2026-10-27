@@ -3,14 +3,14 @@
   "schema": {
     "type": "object",
     "required": [
-      "domain"
+      "fqdn"
     ],
     "properties": {
-      "domain": {
+      "fqdn": {
         "type": "string"
       }
     }
   },
-  "identifier_keys": "domain",
+  "identifier_keys": "fqdn",
   "approval_required": true
 }

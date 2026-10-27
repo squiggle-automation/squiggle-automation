@@ -3,18 +3,17 @@
   "schema": {
     "type": "object",
     "required": [
-      "address",
+      "ip_address",
       "port",
       "protocol"
     ],
     "properties": {
-      "address": {
+      "ip_address": {
         "type": "string",
-        "description": ""
+        "description": "IPv4 or IPv6 address"
       },
       "port": {
-        "type": "number",
-        "description": ""
+        "type": "number"
       },
       "protocol": {
         "enum": [
@@ -25,14 +24,14 @@
       },
       "service": {
         "type": "string",
-        "description": ""
+        "description": "Discovered service"
       },
       "info": {
         "type": "string",
-        "description": ""
+        "description": "More information about discovered service"
       }
     }
   },
-  "identifier_keys": "address,port,protocol",
+  "identifier_keys": "ip_address,port,protocol",
   "approval_required": false
 }

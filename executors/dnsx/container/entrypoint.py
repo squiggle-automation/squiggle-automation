@@ -17,9 +17,9 @@ def add_entities_from_record(record):
     TXT is not handled
     """
     for address in record.get("a", []):
-        executor.add_output_entity("ipv4_address", {"address": address})
+        executor.add_output_entity("ipv4_address", {"ipv4_address": address})
     for address in record.get("aaaa", []):
-        executor.add_output_entity("ipv6_address", {"address": address})
+        executor.add_output_entity("ipv6_address", {"ipv6_address": address})
     for field in ("cname", "ns", "mx", "srv"):
         for value in record.get(field, []):
             # these records could contain domains or ips
@@ -27,10 +27,10 @@ def add_entities_from_record(record):
             try:
                 address = ipaddress.ip_address(value)
             except ValueError:
-                executor.add_output_entity("domain", {"domain": value})
+                executor.add_output_entity("domain", {"fqdn": value})
                 continue
             entitytype = "ipv4_address" if address.version == 4 else "ipv6_address"
-            executor.add_output_entity(entitytype, {"address": value})
+            executor.add_output_entity(entitytype, {entitytype: value})
 
 
 # init helper and read input
@@ -46,10 +46,10 @@ executor.exit_on_error()
 
 # get input entities, depending on mode
 if config_mode == "forward":
-    targets = [d["domain"] for d in executor.get_input_entities("domain")]
+    targets = [d["fqdn"] for d in executor.get_input_entities("domain")]
 else:
-    targets = [i["address"] for i in executor.get_input_entities("ipv4_address")]
-    targets += [i["address"] for i in executor.get_input_entities("ipv6_address")]
+    targets = [i["ipv4_address"] for i in executor.get_input_entities("ipv4_address")]
+    targets += [i["ipv6_address"] for i in executor.get_input_entities("ipv6_address")]
 
 # run dnsx
 with open("/data/tmp/targets.txt", "w") as f:
@@ -103,7 +103,7 @@ with open("/data/artifacts/dnsx.jsonl", "r") as f:
                     add_entities_from_record(chained_record)
         else:
             for domain in record.get("ptr", []):
-                executor.add_output_entity("domain", {"domain": domain.rstrip(".")})
+                executor.add_output_entity("domain", {"fqdn": domain.rstrip(".")})
 
 # write output file
 executor.write_output()

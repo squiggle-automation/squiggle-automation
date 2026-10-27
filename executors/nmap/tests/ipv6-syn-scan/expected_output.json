@@ -4,8 +4,8 @@
   "infos": [],
   "data": {
     "service": [
-      { "address": "fd00:100:100:100::20", "port": 80, "protocol": "tcp", "service": "http", "info": "" },
-      { "address": "fd00:100:100:100::20", "port": 8443, "protocol": "tcp", "service": "https-alt", "info": "" }
+      { "ip_address": "fd00:100:100:100::20", "port": 80, "protocol": "tcp", "service": "http", "info": "" },
+      { "ip_address": "fd00:100:100:100::20", "port": 8443, "protocol": "tcp", "service": "https-alt", "info": "" }
     ]
   }
 }

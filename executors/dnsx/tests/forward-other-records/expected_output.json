@@ -4,10 +4,10 @@
   "infos": ["dnsx exited with code 0"],
   "data": {
     "ipv4_address": [
-      { "address": "10.10.0.42" }
+      { "ipv4_address": "10.10.0.42" }
     ],
     "domain": [
-      { "domain": "resolve.test.local" }
+      { "fqdn": "resolve.test.local" }
     ]
   }
 }

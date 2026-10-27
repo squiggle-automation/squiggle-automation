@@ -3,15 +3,15 @@
   "schema": {
     "type": "object",
     "required": [
-      "address"
+      "ipv4_address"
     ],
     "properties": {
-      "address": {
+      "ipv4_address": {
         "type": "string",
         "format": "ipv4"
       }
     }
   },
-  "identifier_keys": "address",
+  "identifier_keys": "ipv4_address",
   "approval_required": true
 }

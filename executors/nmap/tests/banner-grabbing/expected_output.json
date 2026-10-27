@@ -4,7 +4,7 @@
   "infos": [],
   "data": {
     "service": [
-      { "address": "100.100.100.20", "port": 2222, "protocol": "tcp", "service": "ssh", "info": "protocol 2.0" }
+      { "ip_address": "100.100.100.20", "port": 2222, "protocol": "tcp", "service": "ssh", "info": "protocol 2.0" }
     ]
   }
 }

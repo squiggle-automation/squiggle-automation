@@ -4,7 +4,7 @@
   "infos": ["dnsx exited with code 0"],
   "data": {
     "domain": [
-      { "domain": "reverse.test.local" }
+      { "fqdn": "reverse.test.local" }
     ]
   }
 }

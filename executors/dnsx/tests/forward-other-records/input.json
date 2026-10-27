@@ -1,7 +1,7 @@
 {
   "data": {
     "domain": [
-      { "domain": "alias.test.local" }
+      { "fqdn": "alias.test.local" }
     ]
   },
   "configuration": {

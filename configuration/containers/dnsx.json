@@ -3,7 +3,7 @@
   "image": "quay.io/squiggle-automation/executor-dnsx",
   "image_tag": "latest",
   "cap_net_raw": false,
-  "net_host": false,
+  "net_host": true,
   "configoptions": [
     "dns_resolver",
     "dnsx_custom_options",
