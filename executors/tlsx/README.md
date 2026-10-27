@@ -5,13 +5,11 @@ Connects to services over TLS and extracts domain names from the presented certi
 
 ## Input data types
 
-- `service` (`address`, `port`, `protocol`) - only `protocol: "tcp"` entries are used; TLS is a
-  TCP concept, `udp` entries are silently skipped.
+- `service`
 
 ## Output data types
 
-- `domain` (`domain`) - one entity per certificate common name and Subject Alternative Name
-  (deduplicated). A host that doesn't speak TLS at all is skipped, not an error.
+- `domain`
 
 ## Config
 

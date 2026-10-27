@@ -11,7 +11,7 @@ executor.read_input()
 
 # tlsx operates on host:port targets - TLS is a TCP concept, so only tcp services make sense
 services = executor.get_input_entities("service")
-targets = [f"{s['address']}:{s['port']}" for s in services if s.get("protocol") == "tcp"]
+targets = [f"{s['ip_address']}:{s['port']}" for s in services if s.get("protocol") == "tcp"]
 
 if targets:
     with open("/data/tmp/targets.txt", "w") as f:
@@ -62,7 +62,7 @@ if targets:
         pass
 
     for domain in sorted(domains):
-        executor.add_output_entity("domain", {"domain": domain})
+        executor.add_output_entity("domain", {"fqdn": domain})
 
 # write output file
 executor.write_output()

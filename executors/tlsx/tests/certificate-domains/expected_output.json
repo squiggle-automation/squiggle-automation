@@ -4,9 +4,9 @@
   "infos": [],
   "data": {
     "domain": [
-      { "domain": "tls-target.test.local" },
-      { "domain": "alt1.test.local" },
-      { "domain": "alt2.test.local" }
+      { "fqdn": "tls-target.test.local" },
+      { "fqdn": "alt1.test.local" },
+      { "fqdn": "alt2.test.local" }
     ]
   }
 }
