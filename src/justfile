@@ -8,3 +8,9 @@ build:
   @echo "# Building squiggle-automation container"
   @echo "#"
   {{container_runtime}} build -t quay.io/squiggle-automation/squiggle-automation .
+
+push:
+  @echo "#"
+  @echo "# Pushing squiggle-automation container"
+  @echo "#"
+  {{container_runtime}} push quay.io/squiggle-automation/squiggle-automation
