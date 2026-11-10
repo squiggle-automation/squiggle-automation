@@ -74,6 +74,33 @@ class ExecutorHelper:
                 f'configuration option "{name}" has invalid type - expected boolean (0/1, true/false, yes/no)'
             )
 
+    def get_config_int(self, name, default=None, required=False, min_value=None, max_value=None):
+        """
+        Returns config as integer.
+        Values that are not an integer or outside of min_value/max_value (both inclusive, both optional) are rejected.
+        """
+        value = self.get_config(name, default, required)
+        if value is None:
+            return
+
+        # if the default value is used, it might be an integer already
+        try:
+            value = int(value)
+        except ValueError:
+            self.add_error(f'configuration option "{name}" has invalid type - expected integer')
+            return
+
+        if (min_value is not None and value < min_value) or (max_value is not None and value > max_value):
+            limits = []
+            if min_value is not None:
+                limits.append(f">= {min_value}")
+            if max_value is not None:
+                limits.append(f"<= {max_value}")
+            self.add_error(f'configuration option "{name}" has invalid value - allowed: {" and ".join(limits)}')
+            return
+
+        return value
+
     def get_config_choices(self, name, default=None, required=False, choices=[]):
         """
         Returns config and validates that it is a valid choice.
@@ -90,6 +117,24 @@ class ExecutorHelper:
             self.add_error(f'configuration option "{name}" has invalid value - allowed: {", ".join(choices_lower)}')
         else:
             return value_lower
+
+    def get_config_options(self, name, default=None, required=False, choices=[]):
+        """
+        Returns config as list and validates that each element is a valid choice.
+        The value is a comma-separated list of one or more choices, whitespace around them is ignored.
+        The comparison is case-insensitive and a list of lower case strings is returned.
+        """
+        value = self.get_config(name, default, required)
+        if value is None:
+            return
+
+        # check if all values are in choices
+        choices_lower = [x.lower() for x in choices]
+        values_lower = [x.strip().lower() for x in value.split(",") if x.strip()]
+        if not values_lower or any(x not in choices_lower for x in values_lower):
+            self.add_error(f'configuration option "{name}" has invalid value - allowed: {", ".join(choices_lower)}')
+        else:
+            return values_lower
 
     def get_input_entities(self, entitytype):
         try:
