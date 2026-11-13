@@ -12,4 +12,4 @@ class ContainerSerializer(ValidatedModelSerializer):
 
     class Meta:
         model = Container
-        fields = ["name", "image", "image_tag", "cap_net_raw", "net_host", "configoptions"]
+        fields = ["name", "image", "image_tag", "cap_net_raw", "net_host", "mounts", "configoptions"]

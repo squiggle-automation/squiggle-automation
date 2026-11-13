@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 from django.db import DatabaseError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from core.models import WorkerProfile
 
@@ -49,3 +49,20 @@ class ConfigureWorkersTests(TestCase):
         conf = _Conf()
         configure_workers(conf=conf, options={"queues": ["medium"]})
         self.assertEqual(conf.worker_concurrency, 7)
+
+    @override_settings(CONTAINER_MOUNT_ALLOWED_HOST_PATHS=[])
+    def test_warns_if_mount_allowed_host_paths_are_unset(self):
+        WorkerProfile.objects.create(name="medium", concurrency=7)
+        with patch("builtins.print") as print_mock:
+            configure_workers(conf=_Conf(), options={"queues": ["medium"]})
+        print_mock.assert_called_once_with(
+            "Warning: CONTAINER_MOUNT_ALLOWED_HOST_PATHS is not set - mounting host paths into executor containers "
+            "is disabled"
+        )
+
+    @override_settings(CONTAINER_MOUNT_ALLOWED_HOST_PATHS=["/srv/"])
+    def test_no_warning_if_mount_allowed_host_paths_are_set(self):
+        WorkerProfile.objects.create(name="medium", concurrency=7)
+        with patch("builtins.print") as print_mock:
+            configure_workers(conf=_Conf(), options={"queues": ["medium"]})
+        print_mock.assert_not_called()

@@ -70,3 +70,10 @@ def configure_workers(sender=None, conf=None, options=None, instance=None, **kwa
 
     # set concurrency
     conf.worker_concurrency = worker.concurrency
+
+    # check container mounts again when worker starts container in case CONTAINER_MOUNT_ALLOWED_HOST_PATHS
+    # has changed since startup of the app
+    from core.checks import check_container_mount_allowed_host_paths
+
+    for message in check_container_mount_allowed_host_paths(None):
+        print(f"Warning: {message.msg}")
