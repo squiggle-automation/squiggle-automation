@@ -89,8 +89,8 @@ e.g. wordlists.
 * Mounts must be enabled with the ``CONTAINER_MOUNT_ALLOWED_HOST_PATHS`` environment variable
   (comma separated, e.g. ``/srv/``). Only these paths and paths below them can be mounted -
   other mounts are rejected when saving a container and again before running it.
-  Unset (default), mounts are disabled and a warning is logged when the app (system check
-  ``core.W001``) and the workers start.
+  Unset (default), mounts are disabled and an info message is logged when the app (system
+  check ``core.I001``) and the workers start.
 
 .. warning::
 

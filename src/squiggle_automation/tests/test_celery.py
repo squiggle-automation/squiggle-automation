@@ -51,17 +51,17 @@ class ConfigureWorkersTests(TestCase):
         self.assertEqual(conf.worker_concurrency, 7)
 
     @override_settings(CONTAINER_MOUNT_ALLOWED_HOST_PATHS=[])
-    def test_warns_if_mount_allowed_host_paths_are_unset(self):
+    def test_info_if_mount_allowed_host_paths_are_unset(self):
         WorkerProfile.objects.create(name="medium", concurrency=7)
         with patch("builtins.print") as print_mock:
             configure_workers(conf=_Conf(), options={"queues": ["medium"]})
         print_mock.assert_called_once_with(
-            "Warning: CONTAINER_MOUNT_ALLOWED_HOST_PATHS is not set - mounting host paths into executor containers "
+            "Info: CONTAINER_MOUNT_ALLOWED_HOST_PATHS is not set - mounting host paths into executor containers "
             "is disabled"
         )
 
     @override_settings(CONTAINER_MOUNT_ALLOWED_HOST_PATHS=["/srv/"])
-    def test_no_warning_if_mount_allowed_host_paths_are_set(self):
+    def test_no_info_if_mount_allowed_host_paths_are_set(self):
         WorkerProfile.objects.create(name="medium", concurrency=7)
         with patch("builtins.print") as print_mock:
             configure_workers(conf=_Conf(), options={"queues": ["medium"]})

@@ -76,4 +76,4 @@ def configure_workers(sender=None, conf=None, options=None, instance=None, **kwa
     from core.checks import check_container_mount_allowed_host_paths
 
     for message in check_container_mount_allowed_host_paths(None):
-        print(f"Warning: {message.msg}")
+        print(f"Info: {message.msg}")
