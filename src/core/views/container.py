@@ -19,14 +19,14 @@ class ContainerListView(LoginRequiredMixin, ProjectOptionalMixin, ApiJsonPreview
 
 class ContainerCreateView(LoginRequiredMixin, ProjectOptionalMixin, CreateView):
     model = Container
-    fields = ["name", "image", "image_tag", "cap_net_raw", "net_host", "configoptions"]
+    fields = ["name", "image", "image_tag", "cap_net_raw", "net_host", "mounts", "configoptions"]
     template_name = "core/container_form.html"
     success_url = reverse_lazy("core:containers")
 
 
 class ContainerUpdateView(LoginRequiredMixin, ProjectOptionalMixin, UpdateView):
     model = Container
-    fields = ["name", "image", "image_tag", "cap_net_raw", "net_host", "configoptions"]
+    fields = ["name", "image", "image_tag", "cap_net_raw", "net_host", "mounts", "configoptions"]
     template_name = "core/container_form.html"
     success_url = reverse_lazy("core:containers")
 

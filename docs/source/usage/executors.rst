@@ -74,6 +74,38 @@ Two common cases:
 
      mytool --target example.com > /data/artifacts/mytool.stdout 2> /data/artifacts/mytool.stderr
 
+Additional mounts
+^^^^^^^^^^^^^^^^^
+
+A container's ``mounts`` setting maps host paths to container paths, for example
+``{"/srv/wordlists": "/data/wordlists"}``. Each entry is mounted read-only into the container.
+This is useful for files that should be shared or exchanged without rebuilding the image,
+e.g. wordlists.
+
+* Host paths are paths on the Docker host, not inside the platform's worker container.
+* The host path must exist, otherwise the container fails to start.
+* Container paths must not overlap with the directories above (``/data/input``,
+  ``/data/output``, ``/data/tmp``, ``/data/artifacts``).
+* Mounts must be enabled with the ``CONTAINER_MOUNT_ALLOWED_HOST_PATHS`` environment variable
+  (comma separated, e.g. ``/srv/``). Only these paths and paths below them can be mounted -
+  other mounts are rejected when saving a container and again before running it.
+  Unset (default), mounts are disabled and an info message is logged when the app (system
+  check ``core.I001``) and the workers start.
+
+.. warning::
+
+   Mounts give executor containers access to files on the Docker host and can be unsafe:
+
+   * Every user who can edit containers can mount any file below the allowed host paths and run
+     it with any image - treat everything below ``CONTAINER_MOUNT_ALLOWED_HOST_PATHS`` as readable
+     by all users of the platform, across all projects.
+   * A read-only mount of a Unix socket can still be used to talk to it. If e.g. the Docker socket
+     (``/var/run/docker.sock``) is below an allowed path, a container can gain full control of the
+     host.
+   * Docker follows symlinks. A symlink below an allowed path that points elsewhere (e.g.
+     ``/srv/x -> /etc``) makes its target mountable. This cannot be detected by the platform.
+
+
 Data format
 -----------
 
@@ -320,8 +352,14 @@ Test cases live next to each executor, in ``executors/<name>/tests/<case>/``:
 * ``expected_output.json`` - what the executor is expected to produce.
 
 Additional files:
+
 * ``executors/<name>/tests/cap_net_raw`` - optional, empty marker file for the whole executor; if present, every case's container is run with ``--cap-add NET_RAW`` (mirrors the
-``cap_net_raw`` setting in the application).
+  ``cap_net_raw`` setting in the application).
+* ``executors/<name>/tests/mounts.json`` - optional, for the whole executor; a JSON object
+  ``{"<host path>": "<container path>"}`` whose entries are mounted read-only into every case's
+  container (mirrors the ``mounts`` setting in the application). Relative host paths are
+  resolved against the ``tests`` directory, e.g. ``{"wordlists": "/data/wordlists"}`` for
+  ``executors/<name>/tests/wordlists/``.
 
 Usage, from ``executors/``:
 

@@ -215,3 +215,8 @@ TMP_DIR = env("TMP_DIR", default="data/tmp")
 # For example, ARTIFACTS_DIR could be /data/artifacts, but ARTIFACTS_DIR_HOST_OVERRIDE could /home/user/data/artifacts
 ARTIFACTS_DIR_HOST_OVERRIDE = env("ARTIFACTS_DIR_HOST_OVERRIDE", default=None)
 TMP_DIR_HOST_OVERRIDE = env("TMP_DIR_HOST_OVERRIDE", default=None)
+
+# host paths that containers may mount (see Container.mounts), e.g. "/srv/" - comma separated
+# mounts of other host paths are rejected when saving a container and again when running it
+# empty (default): mounts are disabled
+CONTAINER_MOUNT_ALLOWED_HOST_PATHS = env.list("CONTAINER_MOUNT_ALLOWED_HOST_PATHS", default=[])

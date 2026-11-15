@@ -135,6 +135,15 @@ def test_executor_case(name, case_dir, tests_dir, runtime, config):
         # the same image with the same capability needs
         cap_args = ["--cap-add", "NET_RAW"] if (tests_dir / "cap_net_raw").exists() else []
 
+        # optional, also for the whole executor - mirrors the container's "mounts" setting, with
+        # relative host paths resolved against the tests directory
+        mount_args = []
+        mounts_file = tests_dir / "mounts.json"
+        if mounts_file.exists():
+            for host_path, container_path in json.loads(mounts_file.read_text()).items():
+                source = (tests_dir / host_path).resolve()
+                mount_args += ["--mount", f"type=bind,source={source},target={container_path},readonly"]
+
         # attach_network can be unset/empty ("testing" wants no network attached at all)
         attach_network = config["testing"].get("attach_network")
         network_args = ["--network", attach_network] if attach_network else []
@@ -153,6 +162,7 @@ def test_executor_case(name, case_dir, tests_dir, runtime, config):
                 f"{tmp_dir}:/data/tmp",
                 "-v",
                 f"{artifacts_dir}:/data/artifacts",
+                *mount_args,
                 *cap_args,
                 image_tag(name, config),
             ]

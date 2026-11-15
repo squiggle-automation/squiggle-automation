@@ -7,6 +7,7 @@ import string
 import docker
 from celery import shared_task
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 from core.exceptions import (
     ExecutionCancledError,
@@ -144,6 +145,17 @@ def _run_container(execution, container, work_dir_artifacts, work_dir_input, wor
     # use host network based on config
     network_mode = "host" if container.net_host else None
 
+    # additional read-only mounts based on config
+    # a mount fails if the host path does not exist instead of silently creating an empty directory
+    try:
+        container.validate_mounts()
+    except ValidationError as e:
+        raise ExecutionRuntimeError("invalid mounts: " + " ".join(str(m) for m in e.messages))
+    mounts = [
+        docker.types.Mount(target=container_path, source=host_path, type="bind", read_only=True)
+        for host_path, container_path in container.mounts.items()
+    ]
+
     try:
         docker_client = docker.from_env()
         docker_client.containers.run(
@@ -155,6 +167,7 @@ def _run_container(execution, container, work_dir_artifacts, work_dir_input, wor
                 work_dir_output_full: {"bind": "/data/output", "mode": "rw"},
                 work_dir_tmp_full: {"bind": "/data/tmp", "mode": "rw"},
             },
+            mounts=mounts,
             cap_add=cap_list,
             network_mode=network_mode,
         )

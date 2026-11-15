@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -83,6 +83,37 @@ class ContainerApiTests(TestCase):
         )
         self.assertEqual(r.status_code, 400)
         self.assertFalse(Container.objects.filter(name="container-bad-option").exists())
+
+    @override_settings(CONTAINER_MOUNT_ALLOWED_HOST_PATHS=["/srv/"])
+    def test_create_container_with_mounts(self):
+        r = self.client.post(
+            reverse("api:container-list"),
+            {"name": "container-with-mounts", "image": "alpine", "mounts": {"/srv/wordlists": "/data/wordlists"}},
+            format="json",
+        )
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(r.data["mounts"], {"/srv/wordlists": "/data/wordlists"})
+
+        container = Container.objects.get(name="container-with-mounts")
+        self.assertEqual(container.mounts, {"/srv/wordlists": "/data/wordlists"})
+
+    def test_create_container_without_mounts_defaults_to_empty_object(self):
+        r = self.client.post(
+            reverse("api:container-list"), {"name": "container-no-mounts", "image": "alpine"}, format="json"
+        )
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(r.data["mounts"], {})
+
+    @override_settings(CONTAINER_MOUNT_ALLOWED_HOST_PATHS=["/srv/"])
+    def test_create_container_with_invalid_mounts_is_rejected(self):
+        r = self.client.post(
+            reverse("api:container-list"),
+            {"name": "container-bad-mounts", "image": "alpine", "mounts": {"/srv/wordlists": "/data/tmp"}},
+            format="json",
+        )
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("mounts", r.data)
+        self.assertFalse(Container.objects.filter(name="container-bad-mounts").exists())
 
     def test_update_container(self):
         container = Container.objects.create(name="to-update", image="alpine")
