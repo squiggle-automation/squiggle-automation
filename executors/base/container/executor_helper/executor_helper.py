@@ -118,10 +118,10 @@ class ExecutorHelper:
         else:
             return value_lower
 
-    def get_config_options(self, name, default=None, required=False, choices=[]):
+    def get_config_choices_list(self, name, default=None, required=False, choices=[]):
         """
         Returns config as list and validates that each element is a valid choice.
-        The value is a comma-separated list of one or more choices, whitespace around them is ignored.
+        As input a comma-separated list of one or more choices is expected; whitespaces around them are ignored.
         The comparison is case-insensitive and a list of lower case strings is returned.
         """
         value = self.get_config(name, default, required)
