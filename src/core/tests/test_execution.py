@@ -66,6 +66,249 @@ class ExecutionListViewTests(ExecutionTestCase):
         self.assertEqual(executions[0].info_count, 1)
         self.assertEqual(executions[0].total_logs, 4)
 
+    def test_shows_a_message_when_there_are_no_executions(self):
+        r = self.client.get(reverse("core:executions", kwargs={"project": self.project.pk}))
+
+        self.assertContains(r, "No executions yet.")
+
+    def test_htmx_request_renders_only_the_list(self):
+        Execution.objects.create(project=self.project, executor=self.executor)
+
+        r = self.client.get(
+            reverse("core:executions", kwargs={"project": self.project.pk}), headers={"hx-request": "true"}
+        )
+
+        self.assertEqual(r.status_code, 200)
+        self.assertTemplateUsed(r, "core/execution_list_content.html")
+        self.assertTemplateNotUsed(r, "core/execution_list.html")
+        self.assertNotContains(r, "<aside")
+        # the button is part of the swapped content, otherwise it would not follow the filters
+        self.assertContains(r, "Retry all failed")
+
+    def test_history_restore_renders_the_full_page(self):
+        r = self.client.get(
+            reverse("core:executions", kwargs={"project": self.project.pk}),
+            headers={"hx-request": "true", "hx-history-restore-request": "true"},
+        )
+
+        self.assertEqual(r.status_code, 200)
+        self.assertTemplateUsed(r, "core/execution_list.html")
+        self.assertContains(r, "<aside")
+
+
+class ExecutionListSortTests(ExecutionTestCase):
+    """Sorting of the execution list, see ExecutionListView.get_sort()."""
+
+    def setUp(self):
+        super().setUp()
+
+        container = self.executor.container
+        self.executor_a = Executor.objects.create(name="a-executor", container=container)
+        self.executor_z = Executor.objects.create(name="z-executor", container=container)
+
+        # created in this order, so created_at (and pk) ascend in it. the executor names and the
+        # states sort differently than that, so a mix-up of the orderings cannot pass unnoticed
+        self.first = Execution.objects.create(
+            project=self.project, executor=self.executor_z, state=Execution.STATE_QUEUED
+        )
+        self.second = Execution.objects.create(
+            project=self.project, executor=self.executor_a, state=Execution.STATE_FAILED
+        )
+        self.third = Execution.objects.create(
+            project=self.project, executor=self.executor, state=Execution.STATE_FINISHED
+        )
+
+    def url(self, query=""):
+        url = reverse("core:executions", kwargs={"project": self.project.pk})
+
+        return f"{url}?{query}" if query else url
+
+    def test_default_sorting_is_newest_first(self):
+        r = self.client.get(self.url())
+
+        self.assertEqual(r.context["sort_key"], "created_at")
+        self.assertTrue(r.context["sort_descending"])
+        self.assertEqual(list(r.context["executions"]), [self.third, self.second, self.first])
+
+    def test_sort_ascending_by_executor_name(self):
+        r = self.client.get(self.url("s=executor"))
+
+        self.assertEqual(r.context["sort_key"], "executor")
+        self.assertFalse(r.context["sort_descending"])
+        # a-executor, my-executor, z-executor
+        self.assertEqual(list(r.context["executions"]), [self.second, self.third, self.first])
+
+    def test_sort_descending_by_state(self):
+        r = self.client.get(self.url("s=-state"))
+
+        # failed (7), finished (6), queued (3)
+        self.assertEqual(list(r.context["executions"]), [self.second, self.third, self.first])
+
+    def test_sort_ascending_by_created_at(self):
+        r = self.client.get(self.url("s=created_at"))
+
+        self.assertEqual(list(r.context["executions"]), [self.first, self.second, self.third])
+
+    def test_unknown_sort_column_falls_back_to_the_default(self):
+        for query in ["s=nope", "s=-nope", "s=executor__name", "s="]:
+            r = self.client.get(self.url(query))
+
+            self.assertEqual(r.context["sort_key"], "created_at", query)
+            self.assertTrue(r.context["sort_descending"], query)
+            self.assertEqual(list(r.context["executions"]), [self.third, self.second, self.first], query)
+
+    def test_rows_with_equal_sort_values_are_newest_first(self):
+        Execution.objects.filter(pk__in=[self.first.pk, self.second.pk, self.third.pk]).update(
+            state=Execution.STATE_FAILED
+        )
+
+        r = self.client.get(self.url("s=state"))
+
+        self.assertEqual(list(r.context["executions"]), [self.third, self.second, self.first])
+
+    def test_header_links_sort_ascending_and_flip_to_descending(self):
+        r = self.client.get(self.url())
+
+        headers = r.context["sort_headers"]
+        self.assertEqual(set(headers), {"executor", "state", "created_at"})
+        # the default sorting shows up on its column, and clicking it flips the direction
+        self.assertTrue(headers["created_at"]["sorted"])
+        self.assertTrue(headers["created_at"]["descending"])
+        self.assertEqual(headers["created_at"]["url"], f"{self.url()}?s=created_at")
+        self.assertFalse(headers["executor"]["sorted"])
+        self.assertEqual(headers["executor"]["url"], f"{self.url()}?s=executor")
+
+        # following it sorts ascending, and offers descending next
+        r = self.client.get(headers["executor"]["url"])
+        header = r.context["sort_headers"]["executor"]
+        self.assertTrue(header["sorted"])
+        self.assertFalse(header["descending"])
+        self.assertEqual(header["url"], f"{self.url()}?s=-executor")
+        self.assertContains(r, 'aria-sort="ascending"')
+
+        r = self.client.get(header["url"])
+        header = r.context["sort_headers"]["executor"]
+        self.assertTrue(header["descending"])
+        self.assertEqual(header["url"], f"{self.url()}?s=executor")
+        self.assertContains(r, 'aria-sort="descending"')
+
+    def test_sorting_keeps_the_filters_and_drops_the_page(self):
+        r = self.client.get(self.url("q=exec&state=7&page=1"))
+
+        self.assertEqual(r.context["sort_headers"]["state"]["url"], f"{self.url()}?q=exec&state=7&s=state")
+
+    def test_sorting_is_sent_along_with_the_filters(self):
+        r = self.client.get(self.url("s=-executor"))
+
+        # the hidden input that hx-include picks up when a filter changes
+        self.assertContains(r, '<input type="hidden" class="execution-filter" name="s" value="-executor">', html=True)
+
+
+class ExecutionListFilterTests(ExecutionTestCase):
+    """Searching and filtering of the execution list, see ExecutionListView.get_queryset()."""
+
+    def setUp(self):
+        super().setUp()
+
+        self.nmap = Executor.objects.create(name="nmap", container=self.executor.container)
+
+        self.failed = Execution.objects.create(
+            project=self.project, executor=self.executor, state=Execution.STATE_FAILED
+        )
+        self.finished = Execution.objects.create(
+            project=self.project, executor=self.nmap, state=Execution.STATE_FINISHED
+        )
+
+    def url(self, query=""):
+        url = reverse("core:executions", kwargs={"project": self.project.pk})
+
+        return f"{url}?{query}" if query else url
+
+    def test_search_matches_a_substring_of_the_executor_name(self):
+        r = self.client.get(self.url("q=NMA"))
+
+        self.assertEqual(r.context["search_term"], "NMA")
+        self.assertEqual(list(r.context["executions"]), [self.finished])
+
+    def test_search_for_a_number_also_matches_the_execution_id(self):
+        r = self.client.get(self.url(f"q={self.failed.pk}"))
+
+        self.assertIn(self.failed, list(r.context["executions"]))
+
+    def test_search_for_a_number_also_matches_the_executor_name(self):
+        executor = Executor.objects.create(name="executor-12345678", container=self.executor.container)
+        execution = Execution.objects.create(project=self.project, executor=executor)
+
+        r = self.client.get(self.url("q=12345678"))
+
+        self.assertEqual(list(r.context["executions"]), [execution])
+
+    def test_search_for_an_id_out_of_range_matches_nothing(self):
+        for term in ["99999999999999999999999999", "²"]:
+            r = self.client.get(self.url(f"q={term}"))
+
+            self.assertEqual(r.status_code, 200, term)
+            self.assertEqual(list(r.context["executions"]), [], term)
+
+    def test_search_does_not_find_executions_of_other_projects(self):
+        other_project = Project.objects.create(name="project-2")
+        other = Execution.objects.create(project=other_project, executor=self.nmap)
+
+        r = self.client.get(self.url(f"q={other.pk}"))
+        self.assertNotIn(other, list(r.context["executions"]))
+
+        r = self.client.get(self.url("q=nmap"))
+        self.assertEqual(list(r.context["executions"]), [self.finished])
+
+    def test_state_can_be_filtered(self):
+        r = self.client.get(self.url(f"state={Execution.STATE_FAILED}"))
+
+        self.assertEqual(r.context["state_filter"], Execution.STATE_FAILED)
+        self.assertEqual(list(r.context["executions"]), [self.failed])
+        self.assertContains(r, f'<option value="{Execution.STATE_FAILED}" selected>', html=False)
+
+    def test_invalid_state_is_ignored(self):
+        for query in ["state=nope", "state=99", "state="]:
+            r = self.client.get(self.url(query))
+
+            self.assertIsNone(r.context["state_filter"], query)
+            self.assertEqual(len(r.context["executions"]), 2, query)
+
+    def test_search_and_state_are_combined(self):
+        r = self.client.get(self.url(f"q=nmap&state={Execution.STATE_FAILED}"))
+
+        self.assertEqual(list(r.context["executions"]), [])
+        self.assertContains(r, "No executions match the filter.")
+
+    def test_clear_filters_url_keeps_the_sorting(self):
+        r = self.client.get(self.url(f"s=-state&q=x&state={Execution.STATE_FAILED}&page=1"))
+
+        self.assertTrue(r.context["filters_active"])
+        self.assertEqual(r.context["clear_filters_url"], f"{self.url()}?s=-state")
+
+    def test_clear_filters_is_only_offered_while_a_filter_is_active(self):
+        r = self.client.get(self.url("q="))
+
+        self.assertFalse(r.context["filters_active"])
+        self.assertNotContains(r, "Clear filters")
+
+    def test_retry_all_failed_is_enabled_without_a_filter(self):
+        r = self.client.get(self.url("s=state"))
+
+        self.assertNotContains(r, "Clear the filters to use it.")
+        self.assertNotContains(r, "disabled")
+
+    def test_retry_all_failed_is_disabled_while_a_filter_is_active(self):
+        for query in ["q=nmap", f"state={Execution.STATE_FAILED}"]:
+            r = self.client.get(self.url(query))
+
+            self.assertContains(r, "Clear the filters to use it.", msg_prefix=query)
+            self.assertContains(
+                r,
+                '<button type="submit" class="btn btn-sm btn-outline-primary" disabled>',
+                msg_prefix=query,
+            )
+
 
 class ExecutionDetailViewTests(ExecutionTestCase):
     def test_execution_of_other_project_is_404(self):

@@ -377,6 +377,22 @@ class EntityListSortTests(EntityTestCase):
 
         self.assertEqual(r.context["column_headers"][0]["url"], f"{self.url()}?c=address&f_address=1.1&s=address")
 
+    def test_sorting_is_sent_along_with_the_filters(self):
+        # the hidden input that hx-include picks up when a filter changes - without it, typing
+        # into a filter would drop the sorting
+        r = self.client.get(self.url("s=-address"))
+        self.assertContains(r, '<input type="hidden" class="entity-filter" name="s" value="-address">', html=True)
+
+        r = self.client.get(self.url("s=service"))
+        self.assertContains(r, '<input type="hidden" class="entity-filter" name="s" value="service">', html=True)
+
+    def test_default_sorting_is_not_sent_along_with_the_filters(self):
+        # nothing picked (or an unknown key) -> no "s" at all, rather than an empty or bogus one
+        for query in ["", "s=nope"]:
+            r = self.client.get(self.url(query))
+
+            self.assertNotContains(r, 'name="s"', msg_prefix=query)
+
     def test_pages_do_not_repeat_rows_when_sorted_by_a_key_with_equal_values(self):
         # same value in the sorted column everywhere, so only the tiebreaker of
         # order_entity_by_values() decides the order of these rows

@@ -1,0 +1,20 @@
+{% comment %}
+A <th> that sorts the list by its column when clicked, see ExecutionListView.get_sort_headers().
+
+Parameters:
+    header  dict with label, url, sorted, descending
+    width   optional width of the column
+{% endcomment %}
+<th scope="col"{% if width %} width="{{ width }}"{% endif %}{% if header.sorted %} aria-sort="{% if header.descending %}descending{% else %}ascending{% endif %}"{% endif %}>
+    <a class="link-underline link-underline-opacity-0 link-underline-opacity-100-hover text-body"
+       href="{{ header.url }}"{% if list_htmx_target %} hx-get="{{ header.url }}"{% endif %}>
+        {{ header.label }}
+        {% if header.sorted %}
+            {% if header.descending %}
+            <i class="bi bi-sort-down" aria-hidden="true"></i>
+            {% else %}
+            <i class="bi bi-sort-up" aria-hidden="true"></i>
+            {% endif %}
+        {% endif %}
+    </a>
+</th>

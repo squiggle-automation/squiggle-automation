@@ -1,0 +1,103 @@
+{% load i18n %}
+
+{% comment %}
+Every control that makes up the current query carries class="execution-filter" and is sent
+along by hx-include, so that changing one of them keeps the others. The sorting lives in the
+url, not in an input, hence the hidden input for it.
+{% endcomment %}
+<input type="hidden" class="execution-filter" name="s" value="{% if sort_descending %}-{% endif %}{{ sort_key }}" />
+
+<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+    {% comment %}
+    "Retry all failed" retries every failed execution of the project, not only the shown ones -
+    so while a filter is active it is disabled, rather than suggesting otherwise. It is part of
+    this partial so that it follows the filters as they change. The title sits on a wrapper,
+    because a disabled button gets no mouse events and would not show it.
+    {% endcomment %}
+    <form action="{% url "core:execution-retry-all" active_project.pk %}" method="post" class="d-inline">
+        {% csrf_token %}
+        {% if filters_active %}
+        <span class="d-inline-block" tabindex="0"
+              title="{% trans "Retries all failed executions of the project, not only the filtered ones. Clear the filters to use it." %}">
+            <button type="submit" class="btn btn-sm btn-outline-primary" disabled>
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> {% trans "Retry all failed" %}
+            </button>
+        </span>
+        {% else %}
+        <button type="submit" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> {% trans "Retry all failed" %}
+        </button>
+        {% endif %}
+    </form>
+
+    <div>
+        <label class="visually-hidden" for="execution-search">{% trans "Search" %}</label>
+        <input type="search" class="form-control form-control-sm execution-filter" id="execution-search" name="q"
+               value="{{ search_term }}" placeholder="{% trans "Search executor or ID" %}"
+               hx-get="{{ request.path }}" hx-trigger="keyup changed delay:400ms, search, change"
+               hx-include=".execution-filter" />
+    </div>
+
+    <div>
+        <label class="visually-hidden" for="execution-state">{% trans "State" %}</label>
+        <select class="form-select form-select-sm execution-filter" id="execution-state" name="state"
+                hx-get="{{ request.path }}" hx-trigger="change" hx-include=".execution-filter">
+            <option value="">{% trans "Any state" %}</option>
+            {% for value, label in state_choices %}
+            <option value="{{ value }}" {% if state_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {% if filters_active %}
+    <a class="btn btn-sm btn-outline-secondary" href="{{ clear_filters_url }}"
+       {% if list_htmx_target %}hx-get="{{ clear_filters_url }}"{% endif %}>
+        <i class="bi bi-x-lg" aria-hidden="true"></i> {% trans "Clear filters" %}
+    </a>
+    {% endif %}
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                {% include "core/components/sortable_header.html" with header=sort_headers.executor width="30%" %}
+                {% include "core/components/sortable_header.html" with header=sort_headers.state width="15%" %}
+                <th scope="col" width="15%">{% trans "Log" %}</th>
+                {% include "core/components/sortable_header.html" with header=sort_headers.created_at width="20%" %}
+                <th scope="col" width="20%"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for execution in executions %}
+            <tr>
+                <td scope="row">{{ execution.executor.name }}</td>
+                <td>{{ execution.get_state_display }}</td>
+                <td>
+                    <span class="badge {% if execution.error_count == 0 %}bg-secondary{% else %}bg-danger{% endif %}">{{ execution.error_count }}</span>
+                    <span class="badge {% if execution.warning_count == 0 %}bg-secondary{% else %}bg-warning{% endif %}">{{ execution.warning_count }}</span>
+                    <span class="badge {% if execution.info_count == 0 %}bg-secondary{% else %}bg-info{% endif %}">{{ execution.info_count }}</span>
+                </td>
+                <td>{{ execution.created_at }}</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary me-1" href="{% url "core:execution-details" active_project.pk execution.pk %}">
+                        <i class="bi bi-arrow-right-circle"></i> {% trans "Details" %}
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-muted">
+                    {% if filters_active %}
+                        {% trans "No executions match the filter." %}
+                    {% else %}
+                        {% trans "No executions yet." %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "squiggle_automation/components/pagination.html" %}

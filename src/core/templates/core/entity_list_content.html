@@ -3,7 +3,7 @@
 {% comment %}
 Every control that makes up the current query carries class="entity-filter" and is sent along
 by hx-include, so that changing one of them keeps the others. That includes the hidden inputs
-for the shown columns below - the column selection lives in the url, not in an input, and
+for the shown columns and the sorting below - both live in the url, not in an input, and
 would otherwise be lost as soon as a filter is typed.
 
 A <form> would be the obvious way to group them, but the table rows contain the forms for
@@ -12,6 +12,9 @@ approve/decline/reprocess, and forms must not be nested - hence hx-include with 
 {% for column in columns %}
 <input type="hidden" class="entity-filter" name="c" value="{{ column }}" />
 {% endfor %}
+{% if sort_key %}
+<input type="hidden" class="entity-filter" name="s" value="{% if sort_descending %}-{% endif %}{{ sort_key }}" />
+{% endif %}
 
 <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
     <div>
