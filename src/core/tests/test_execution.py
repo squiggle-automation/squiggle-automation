@@ -339,6 +339,93 @@ class ExecutionListFilterTests(ExecutionTestCase):
             )
 
 
+class ExecutionListStateOverviewTests(ExecutionTestCase):
+    """The overview of the state categories above the list, see ExecutionListView.get_state_overview()."""
+
+    def setUp(self):
+        super().setUp()
+
+        for state, count in [
+            (Execution.STATE_MANUAL, 1),
+            (Execution.STATE_QUEUED, 2),
+            (Execution.STATE_RUNNING, 1),
+            (Execution.STATE_PROCESSING_RESULTS, 1),
+            (Execution.STATE_FAILED, 3),
+            (Execution.STATE_FINISHED, 4),
+            (Execution.STATE_ABORTED, 1),
+        ]:
+            for _ in range(count):
+                Execution.objects.create(project=self.project, executor=self.executor, state=state)
+
+    def url(self, query=""):
+        url = reverse("core:executions", kwargs={"project": self.project.pk})
+
+        return f"{url}?{query}" if query else url
+
+    def counts(self, response):
+        return {entry["category"]: entry["count"] for entry in response.context["state_overview"]}
+
+    def test_counts_per_category_without_done(self):
+        r = self.client.get(self.url())
+
+        self.assertEqual(
+            self.counts(r),
+            {
+                Execution.STATE_CATEGORY_NOT_STARTED: 3,
+                Execution.STATE_CATEGORY_RUNNING: 2,
+                Execution.STATE_CATEGORY_FAILED: 3,
+            },
+        )
+        self.assertNotContains(r, f'data-state-category="{Execution.STATE_CATEGORY_DONE}"')
+
+    def test_counts_only_executions_of_this_project(self):
+        other_project = Project.objects.create(name="project-2")
+        Execution.objects.create(project=other_project, executor=self.executor, state=Execution.STATE_FAILED)
+
+        r = self.client.get(self.url())
+        self.assertEqual(self.counts(r)[Execution.STATE_CATEGORY_FAILED], 3)
+
+    def test_counts_ignore_the_filters(self):
+        r = self.client.get(self.url("q=nothing-matches&state=failed"))
+
+        self.assertEqual(list(r.context["executions"]), [])
+        self.assertEqual(self.counts(r)[Execution.STATE_CATEGORY_NOT_STARTED], 3)
+        self.assertEqual(self.counts(r)[Execution.STATE_CATEGORY_FAILED], 3)
+
+    def test_entries_filter_for_their_category_and_keep_the_sorting(self):
+        r = self.client.get(self.url("s=-state&q=x"))
+
+        urls = {entry["category"]: entry["url"] for entry in r.context["state_overview"]}
+        self.assertEqual(urls[Execution.STATE_CATEGORY_FAILED], f"{self.url()}?s=-state&state=failed")
+        self.assertFalse(any(entry["active"] for entry in r.context["state_overview"]))
+
+    def test_active_entry_removes_the_filter(self):
+        r = self.client.get(self.url("s=-state&state=running"))
+
+        entries = {entry["category"]: entry for entry in r.context["state_overview"]}
+        self.assertTrue(entries[Execution.STATE_CATEGORY_RUNNING]["active"])
+        self.assertEqual(entries[Execution.STATE_CATEGORY_RUNNING]["url"], f"{self.url()}?s=-state")
+        self.assertFalse(entries[Execution.STATE_CATEGORY_FAILED]["active"])
+        self.assertContains(r, 'aria-current="true"', count=1)
+
+    def test_empty_categories_are_not_highlighted(self):
+        Execution.objects.filter(state=Execution.STATE_FAILED).delete()
+
+        r = self.client.get(self.url())
+
+        entries = {entry["category"]: entry for entry in r.context["state_overview"]}
+        self.assertEqual(entries[Execution.STATE_CATEGORY_FAILED]["count"], 0)
+        self.assertEqual(entries[Execution.STATE_CATEGORY_FAILED]["color"], "secondary")
+        self.assertEqual(entries[Execution.STATE_CATEGORY_RUNNING]["color"], "primary")
+
+    def test_overview_is_part_of_the_htmx_partial(self):
+        r = self.client.get(self.url(), headers={"HX-Request": "true"})
+
+        self.assertTemplateUsed(r, "core/execution_list_content.html")
+        self.assertTemplateNotUsed(r, "core/execution_list.html")
+        self.assertContains(r, 'id="execution-state-overview"')
+
+
 class ExecutionDetailViewTests(ExecutionTestCase):
     def test_execution_of_other_project_is_404(self):
         other_project = Project.objects.create(name="project-2")

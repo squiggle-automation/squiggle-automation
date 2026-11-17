@@ -44,6 +44,14 @@ class ExecutionListView(LoginRequiredMixin, ProjectRequiredMixin, HtmxPartialMix
     # newest first, as long as nothing else is picked
     default_sort = ("created_at", True)
 
+    # the state categories counted in the overview above the list (see get_state_overview()),
+    # with the bootstrap color they are shown in while there is something to count
+    overview_categories = {
+        Execution.STATE_CATEGORY_NOT_STARTED: "secondary",
+        Execution.STATE_CATEGORY_RUNNING: "primary",
+        Execution.STATE_CATEGORY_FAILED: "danger",
+    }
+
     def get_queryset(self):
         queryset = Execution.objects.filter(project=self.project).select_related("executor")
 
@@ -102,6 +110,31 @@ class ExecutionListView(LoginRequiredMixin, ProjectRequiredMixin, HtmxPartialMix
 
         return category if category in Execution.STATE_CATEGORIES else None
 
+    def get_state_overview(self):
+        counts = Execution.objects.filter(project=self.project).aggregate(
+            **{
+                category: Count("pk", filter=Q(state__in=Execution.STATE_CATEGORIES[category]))
+                for category in self.overview_categories
+            }
+        )
+
+        overview = []
+        for category, color in self.overview_categories.items():
+            active = category == self.state_filter
+
+            overview.append(
+                {
+                    "category": category,
+                    "label": Execution.STATE_CATEGORY_CHOICES[category],
+                    "count": counts[category],
+                    "color": color if counts[category] else "secondary",
+                    "active": active,
+                    "url": self.build_query_url(single={"q": None, "state": None if active else category}),
+                }
+            )
+
+        return overview
+
     def get_sort(self):
         """
         The column to sort by and whether it is descending, picked with "?s=<column>" /
@@ -152,6 +185,7 @@ class ExecutionListView(LoginRequiredMixin, ProjectRequiredMixin, HtmxPartialMix
         context["search_term"] = self.search_term
         context["state_filter"] = self.state_filter
         context["state_choices"] = Execution.STATE_CATEGORY_CHOICES.items()
+        context["state_overview"] = self.get_state_overview()
         context["filters_active"] = bool(self.search_term or self.state_filter is not None)
         # drops every filter, but keeps the sorting
         context["clear_filters_url"] = self.build_query_url(single={"q": None, "state": None})
