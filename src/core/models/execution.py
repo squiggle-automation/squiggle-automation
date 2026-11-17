@@ -38,6 +38,26 @@ class Execution(models.Model):
         STATE_ABORTED: _("Aborted"),
     }
 
+    # coarse grouping of the states, e.g. for filtering - every state must be in exactly one category
+    STATE_CATEGORY_NOT_STARTED = "not_started"
+    STATE_CATEGORY_RUNNING = "running"
+    STATE_CATEGORY_FAILED = "failed"
+    STATE_CATEGORY_DONE = "done"
+
+    STATE_CATEGORY_CHOICES = {
+        STATE_CATEGORY_NOT_STARTED: _("Not started"),
+        STATE_CATEGORY_RUNNING: _("Running"),
+        STATE_CATEGORY_FAILED: _("Failed"),
+        STATE_CATEGORY_DONE: _("Done"),
+    }
+
+    STATE_CATEGORIES = {
+        STATE_CATEGORY_NOT_STARTED: (STATE_FILLING, STATE_MANUAL, STATE_QUEUED),
+        STATE_CATEGORY_RUNNING: (STATE_RUNNING, STATE_PROCESSING_RESULTS),
+        STATE_CATEGORY_FAILED: (STATE_FAILED,),
+        STATE_CATEGORY_DONE: (STATE_FINISHED, STATE_ABORTED),
+    }
+
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,

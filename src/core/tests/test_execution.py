@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from squiggle_automation.testutils import random_password
@@ -36,6 +36,16 @@ class ExecutionTestCase(TestCase):
         self.project = Project.objects.create(name="project-1")
         container = Container.objects.create(name="container", image="image")
         self.executor = Executor.objects.create(name="my-executor", container=container)
+
+
+class ExecutionStateCategoryTests(SimpleTestCase):
+    def test_every_state_is_in_exactly_one_category(self):
+        # fails when a new state is added to STATE_CHOICES without putting it into a category
+        categorized = [state for states in Execution.STATE_CATEGORIES.values() for state in states]
+        self.assertCountEqual(categorized, Execution.STATE_CHOICES.keys())
+
+    def test_every_category_has_a_label(self):
+        self.assertEqual(Execution.STATE_CATEGORIES.keys(), Execution.STATE_CATEGORY_CHOICES.keys())
 
 
 class ExecutionListViewTests(ExecutionTestCase):
@@ -260,28 +270,47 @@ class ExecutionListFilterTests(ExecutionTestCase):
         r = self.client.get(self.url("q=nmap"))
         self.assertEqual(list(r.context["executions"]), [self.finished])
 
-    def test_state_can_be_filtered(self):
-        r = self.client.get(self.url(f"state={Execution.STATE_FAILED}"))
+    def test_state_category_can_be_filtered(self):
+        r = self.client.get(self.url("state=failed"))
 
-        self.assertEqual(r.context["state_filter"], Execution.STATE_FAILED)
+        self.assertEqual(r.context["state_filter"], Execution.STATE_CATEGORY_FAILED)
         self.assertEqual(list(r.context["executions"]), [self.failed])
-        self.assertContains(r, f'<option value="{Execution.STATE_FAILED}" selected>', html=False)
+        self.assertContains(r, '<option value="failed" selected>', html=False)
+
+    def test_state_category_filter_matches_all_states_of_the_category(self):
+        running = Execution.objects.create(project=self.project, executor=self.executor, state=Execution.STATE_RUNNING)
+        processing = Execution.objects.create(
+            project=self.project, executor=self.executor, state=Execution.STATE_PROCESSING_RESULTS
+        )
+        aborted = Execution.objects.create(project=self.project, executor=self.executor, state=Execution.STATE_ABORTED)
+
+        r = self.client.get(self.url("state=running"))
+        self.assertCountEqual(r.context["executions"], [running, processing])
+
+        r = self.client.get(self.url("state=done"))
+        self.assertCountEqual(r.context["executions"], [self.finished, aborted])
+
+    def test_every_state_category_is_offered(self):
+        r = self.client.get(self.url())
+
+        for category in Execution.STATE_CATEGORY_CHOICES:
+            self.assertContains(r, f'<option value="{category}"', html=False)
 
     def test_invalid_state_is_ignored(self):
-        for query in ["state=nope", "state=99", "state="]:
+        for query in ["state=nope", f"state={Execution.STATE_FAILED}", "state="]:
             r = self.client.get(self.url(query))
 
             self.assertIsNone(r.context["state_filter"], query)
             self.assertEqual(len(r.context["executions"]), 2, query)
 
     def test_search_and_state_are_combined(self):
-        r = self.client.get(self.url(f"q=nmap&state={Execution.STATE_FAILED}"))
+        r = self.client.get(self.url("q=nmap&state=failed"))
 
         self.assertEqual(list(r.context["executions"]), [])
         self.assertContains(r, "No executions match the filter.")
 
     def test_clear_filters_url_keeps_the_sorting(self):
-        r = self.client.get(self.url(f"s=-state&q=x&state={Execution.STATE_FAILED}&page=1"))
+        r = self.client.get(self.url("s=-state&q=x&state=failed&page=1"))
 
         self.assertTrue(r.context["filters_active"])
         self.assertEqual(r.context["clear_filters_url"], f"{self.url()}?s=-state")
@@ -299,7 +328,7 @@ class ExecutionListFilterTests(ExecutionTestCase):
         self.assertNotContains(r, "disabled")
 
     def test_retry_all_failed_is_disabled_while_a_filter_is_active(self):
-        for query in ["q=nmap", f"state={Execution.STATE_FAILED}"]:
+        for query in ["q=nmap", "state=failed"]:
             r = self.client.get(self.url(query))
 
             self.assertContains(r, "Clear the filters to use it.", msg_prefix=query)

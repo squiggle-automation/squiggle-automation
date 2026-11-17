@@ -23,7 +23,7 @@ class ExecutionListView(LoginRequiredMixin, ProjectRequiredMixin, HtmxPartialMix
     kept in the url, so that a filtered list can be linked and bookmarked:
         ?s=<column>     sort ascending by a column, "?s=-<column>" for descending
         ?q=<term>       search for a substring of the executor name, or for the execution id
-        ?state=<state>  filter for one Execution state
+        ?state=<cat>    filter for one category of Execution states (see Execution.STATE_CATEGORIES)
     """
 
     context_object_name = "executions"
@@ -53,7 +53,7 @@ class ExecutionListView(LoginRequiredMixin, ProjectRequiredMixin, HtmxPartialMix
 
         self.state_filter = self.get_state_filter()
         if self.state_filter is not None:
-            queryset = queryset.filter(state=self.state_filter)
+            queryset = queryset.filter(state__in=Execution.STATE_CATEGORIES[self.state_filter])
 
         self.sort_key, self.sort_descending = self.get_sort()
         field = self.sort_columns[self.sort_key][1]
@@ -94,13 +94,13 @@ class ExecutionListView(LoginRequiredMixin, ProjectRequiredMixin, HtmxPartialMix
         return condition
 
     def get_state_filter(self):
-        """The Execution state to filter for, picked with "?state=<state>", or None for all states."""
-        try:
-            state = int(self.request.GET.get("state", ""))
-        except ValueError:
-            return None
+        """
+        The category of Execution states to filter for, picked with "?state=<category>", or None
+        for all states.
+        """
+        category = self.request.GET.get("state", "")
 
-        return state if state in Execution.STATE_CHOICES else None
+        return category if category in Execution.STATE_CATEGORIES else None
 
     def get_sort(self):
         """
@@ -151,7 +151,7 @@ class ExecutionListView(LoginRequiredMixin, ProjectRequiredMixin, HtmxPartialMix
 
         context["search_term"] = self.search_term
         context["state_filter"] = self.state_filter
-        context["state_choices"] = Execution.STATE_CHOICES.items()
+        context["state_choices"] = Execution.STATE_CATEGORY_CHOICES.items()
         context["filters_active"] = bool(self.search_term or self.state_filter is not None)
         # drops every filter, but keeps the sorting
         context["clear_filters_url"] = self.build_query_url(single={"q": None, "state": None})
